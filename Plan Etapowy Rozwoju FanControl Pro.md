@@ -982,7 +982,7 @@ Legenda statusów:
 |-----------|--------|-----------|
 | 6.1 Zamknięta beta | PARTIAL | Dodano pakiet operacyjny bety: plan rekrutacji i roster testerow (`docs/beta/tester-recruitment-plan.md`, `docs/beta/tester-roster.csv`), workflow feedback + triage P0/P1/P2 (`docs/beta/beta-feedback-triage.md`), szablon issue z wymaganym support bundle (`.github/ISSUE_TEMPLATE/beta-bug-report.yml`) oraz metryki i review template (`docs/beta/beta-metrics-log.csv`, `docs/beta/beta-metrics-review-template.md`) wraz ze skryptem gate-check (`scripts/beta/Calculate-BetaReadiness.ps1`). Brakuje wykonania rzeczywistej rundy zamknietej bety i uzupelnienia metryk danymi produkcyjnymi. |
 | 6.2 Release Candidate | PARTIAL | Dodano policy feature freeze (`docs/release/feature-freeze-policy.md`), checklistę RC (`docs/release/rc-verification-checklist.md`), dokumentację wydania (`docs/release/KNOWN_ISSUES.md`, `docs/release/user-guide.md`), oraz `CHANGELOG.md` z wpisem RC. Dodano też skrypt tagowania RC w SemVer (`scripts/release/New-RcTag.ps1`). Brakuje wykonania pełnej ręcznej checklisty RC i formalnej decyzji Go/No-Go. |
-| 6.3 Wydanie 1.0 | PARTIAL | Dodano pakiet wydania publicznego: runbook publikacji (`docs/release/public-release-runbook.md`), Getting Started (`docs/release/getting-started.md`), plan hotfixow (`docs/release/hotfix-response-plan.md`), monitoring 72h (`docs/release/post-release-72h-monitoring.md`) i template incydentu hotfix (`.github/ISSUE_TEMPLATE/hotfix-incident.yml`). Workflow release tworzy teraz GitHub Release dla stabilnych tagow (`.github/workflows/release-artifacts.yml`). Brakuje faktycznego opublikowania stabilnego tagu 1.0.0 i wykonania monitoringu po wydaniu. |
+| 6.3 Wydanie 1.0 | DONE | Dodano pakiet wydania publicznego: runbook publikacji (`docs/release/public-release-runbook.md`), Getting Started (`docs/release/getting-started.md`), plan hotfixow (`docs/release/hotfix-response-plan.md`), monitoring 72h (`docs/release/post-release-72h-monitoring.md`) i template incydentu hotfix (`.github/ISSUE_TEMPLATE/hotfix-incident.yml`). Workflow release tworzy GitHub Release dla stabilnych tagow (`.github/workflows/release-artifacts.yml`). Potwierdzono publikacje `v1.0.0` (GitHub Release + MSI/ZIP/SHA256, run #8 z sukcesem, 2026-03-15) oraz uruchomiono raport monitoringu 72h (`docs/release/post-release-72h-report-v1.0.0.md`). |
 
 ### Dodatkowe zadania: Integration Tests
 
@@ -994,7 +994,7 @@ Legenda statusów:
 
 - Gotowe funkcjonalnie: kluczowy core faz 2.x oraz 3.2.
 - Częściowo gotowe: faza 1, 3.1, 3.3 i faza 4 (4.1-4.3).
-- Najwieksza luka: realizacja operacyjna fazy 6.x (realna zamknieta beta + decyzje Go/No-Go i publikacja 1.0).
+- Najwieksza luka: domkniecie operacyjne monitoringu 72h po wydaniu 1.0.0 i decyzja o ewentualnym patchu 1.0.1.
 - brak otwartych krytycznych bugów bezpieczeństwa,
 - działający failsafe i recovery,
 - opublikowana lista kompatybilności,

@@ -6,17 +6,25 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
-- Public release (6.3) assets:
+- (reserved)
+
+## [1.0.0] - 2026-03-15
+
+### Added
+
+- Public release assets:
   - `docs/release/public-release-runbook.md`
   - `docs/release/getting-started.md`
   - `docs/release/hotfix-response-plan.md`
   - `docs/release/post-release-72h-monitoring.md`
+  - `docs/release/post-release-72h-report-v1.0.0.md`
   - `docs/release/RELEASE_NOTES_1.0.0.md`
   - `.github/ISSUE_TEMPLATE/hotfix-incident.yml`
 
 ### Changed
 
-- Release workflow can now create GitHub Release entries for stable tags.
+- Release workflow can create GitHub Release entries for stable tags.
+- Stable release `v1.0.0` published with MSI, ZIP and SHA256 assets.
 
 ## [1.0.0-rc1] - 2026-03-15
 
