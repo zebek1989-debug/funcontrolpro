@@ -78,7 +78,83 @@ jobs:
         run: dotnet build FanControlPro.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test FanControlPro.sln --configuration Release --no-build --verbosity normal
+        id: tests
+        continue-on-error: true
+        run: |
+          dotnet test FanControlPro.sln `
+            --configuration Release `
+            --no-build `
+            --verbosity normal `
+            --logger "trx;LogFileName=results.trx" `
+            --results-directory artifacts/test-results
+
+      - name: Annotate Failed Tests
+        id: test_summary
+        if: always()
+        shell: pwsh
+        run: |
+          $trxFiles = Get-ChildItem -Path artifacts/test-results -Filter *.trx -File -Recurse -ErrorAction SilentlyContinue
+          if (-not $trxFiles) {
+            "has_failures=false" >> $env:GITHUB_OUTPUT
+            Write-Host "No TRX files found."
+            exit 0
+          }
+
+          $failedTests = New-Object System.Collections.Generic.List[string]
+
+          foreach ($trx in $trxFiles) {
+            [xml]$xml = Get-Content -LiteralPath $trx.FullName
+            $results = @($xml.TestRun.Results.UnitTestResult)
+            foreach ($result in $results) {
+              if ($null -eq $result) {
+                continue
+              }
+
+              if ($result.outcome -eq "Passed") {
+                continue
+              }
+
+              $name = if ([string]::IsNullOrWhiteSpace($result.testName)) { "<unknown>" } else { $result.testName }
+              $outcome = if ([string]::IsNullOrWhiteSpace($result.outcome)) { "Unknown" } else { $result.outcome }
+              $message = ""
+
+              if ($result.Output -and $result.Output.ErrorInfo -and $result.Output.ErrorInfo.Message) {
+                $message = "$($result.Output.ErrorInfo.Message)".Replace("`r", " ").Replace("`n", " ").Trim()
+              }
+
+              if ([string]::IsNullOrWhiteSpace($message)) {
+                Write-Host "::error title=Test $outcome::$name"
+              }
+              else {
+                Write-Host "::error title=Test $outcome::$name - $message"
+              }
+
+              $failedTests.Add("$outcome: $name")
+            }
+          }
+
+          if ($failedTests.Count -gt 0) {
+            "has_failures=true" >> $env:GITHUB_OUTPUT
+            Write-Host "Failed tests detected: $($failedTests.Count)"
+          }
+          else {
+            "has_failures=false" >> $env:GITHUB_OUTPUT
+            Write-Host "No failed tests found in TRX."
+          }
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fancontrolpro-release-tests-${{ steps.version.outputs.version }}
+          path: artifacts/test-results/**
+          if-no-files-found: warn
+
+      - name: Fail on Test Errors
+        if: steps.tests.outcome == 'failure' || steps.test_summary.outputs.has_failures == 'true'
+        shell: pwsh
+        run: |
+          throw "Release workflow stopped because tests failed. See test annotations and uploaded TRX artifacts."
 
       - name: Build Baseline MSI Artifacts
         shell: pwsh
