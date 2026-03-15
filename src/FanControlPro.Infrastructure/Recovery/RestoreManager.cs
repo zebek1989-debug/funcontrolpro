@@ -160,10 +160,12 @@ public sealed class RestoreManager : IRestoreManager
             var tempDestination = destinationPath + ".restore-" + Guid.NewGuid().ToString("N");
             try
             {
-                await using var source = File.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                await using var destination = File.Open(tempDestination, FileMode.Create, FileAccess.Write, FileShare.None);
-                await source.CopyToAsync(destination, 81920, cancellationToken).ConfigureAwait(false);
-                await destination.FlushAsync(cancellationToken).ConfigureAwait(false);
+                await using (var source = File.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                await using (var destination = File.Open(tempDestination, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    await source.CopyToAsync(destination, 81920, cancellationToken).ConfigureAwait(false);
+                    await destination.FlushAsync(cancellationToken).ConfigureAwait(false);
+                }
 
                 File.Move(tempDestination, destinationPath, overwrite: true);
             }
