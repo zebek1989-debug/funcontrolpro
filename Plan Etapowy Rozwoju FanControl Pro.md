@@ -979,8 +979,8 @@ Legenda statusów:
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 5.1 Macierz kompatybilności | PARTIAL | Checklisty i artefakty QA są; brak kompletu potwierdzonych runów `Validated` na docelowej macierzy hardware. |
-| 5.2 Performance i soak testing | PARTIAL | Playbooki/skrypty/baselines są; brak finalnych runów 24h z kompletnym raportem metryk. |
+| 5.1 Macierz kompatybilności | PARTIAL | Checklisty i artefakty QA są; dodano automatyczny readiness script `scripts/qa/Validate-Phase5Readiness.ps1`, ale brak kompletu potwierdzonych runów `Validated` na docelowej macierzy hardware. |
+| 5.2 Performance i soak testing | PARTIAL | Playbooki/skrypty/baselines są; readiness script obejmuje testy integration/stress i kontrolę baseline, ale brak finalnych runów 24h z kompletnym raportem metryk. |
 | 5.3 Instalator i dystrybucja | DONE | WiX + pipeline release artifacts + walidacja lifecycle/upgrade MSI są wdrożone. |
 
 ### Faza 6

@@ -13,6 +13,7 @@ This folder contains QA documentation and datasets for milestone 5.x.
 - `performance-baselines.csv` - baseline metrics registry.
 - `performance-run-template.md` - report template for each perf run.
 - `phase4-ux-system-integration-checklist.md` - sign-off checklist for milestone 4.x (tray/onboarding/settings).
+- `phase5-hardware-performance-checklist.md` - sign-off checklist for compatibility matrix + performance baseline.
 
 ## Matrix Validation Script
 
@@ -42,4 +43,16 @@ pwsh -NoProfile -File scripts/performance/Run-Phase52Soak.ps1 `
 
 ```powershell
 pwsh -NoProfile -File scripts/qa/Validate-Phase4Readiness.ps1
+```
+
+## Phase 5 Readiness Script
+
+```powershell
+pwsh -NoProfile -File scripts/qa/Validate-Phase5Readiness.ps1
+```
+
+Strict matrix gate:
+
+```powershell
+pwsh -NoProfile -File scripts/qa/Validate-Phase5Readiness.ps1 -RequireValidatedMatrix
 ```

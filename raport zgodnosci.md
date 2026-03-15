@@ -41,6 +41,9 @@ Projekt jest bardzo blisko produkcji, ale nie można jeszcze uczciwie uznać go 
 - Działa safety/cooldown/read-back logika w backendzie.
 - Istnieją artefakty release i instalator WiX (`installer/wix/*`, workflow release).
 - Dokumentacja QA/release jest obecna i rozbudowana.
+- Dodano automatyczny walidator 5.x:
+  - `scripts/qa/Validate-Phase5Readiness.ps1`
+  - raport wynikowy: `artifacts/qa/phase5-readiness-report.md`
 
 ## 3) Co nadal blokuje pełne „production-ready”
 
