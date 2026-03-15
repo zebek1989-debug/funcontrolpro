@@ -1,0 +1,52 @@
+name: Hotfix Incident
+description: Critical post-release incident report
+title: "[Hotfix]: "
+labels:
+  - hotfix
+body:
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - P0 (critical safety/security)
+        - P1 (major functional regression)
+    validations:
+      required: true
+
+  - type: input
+    id: affected_version
+    attributes:
+      label: Affected Version
+      placeholder: v1.0.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact Summary
+      placeholder: What is broken and who is affected?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Temporary Workaround
+      description: Leave empty if none exists.
+
+  - type: textarea
+    id: support_bundle
+    attributes:
+      label: Support Bundle / Logs
+      description: Required for fast hotfix triage.
+    validations:
+      required: true

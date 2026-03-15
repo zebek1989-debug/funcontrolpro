@@ -15,6 +15,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   build-release:
     runs-on: windows-latest
@@ -222,3 +225,15 @@ jobs:
             artifacts/release/**
             artifacts/release-baseline/**
           if-no-files-found: error
+
+      - name: Create GitHub Release (Stable Tags)
+        if: github.ref_type == 'tag' && !contains(steps.version.outputs.version, '-')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: FanControl Pro ${{ steps.version.outputs.version }}
+          body_path: docs/release/RELEASE_NOTES_1.0.0.md
+          files: |
+            artifacts/release/**/*.msi
+            artifacts/release/**/*.zip
+            artifacts/release/**/SHA256SUMS.txt
