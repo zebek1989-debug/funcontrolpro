@@ -1,0 +1,92 @@
+name: Beta Bug Report
+description: Report a beta defect with required diagnostics bundle
+title: "[Beta]: "
+labels:
+  - beta
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this beta issue.
+        Please complete all required fields, especially support bundle details.
+
+  - type: input
+    id: app_version
+    attributes:
+      label: App Version / Tag
+      description: Example: v0.1.6
+      placeholder: v0.1.6
+    validations:
+      required: true
+
+  - type: dropdown
+    id: support_mode
+    attributes:
+      label: Support Mode
+      description: Hardware classification seen in app
+      options:
+        - Full Control
+        - Monitoring Only
+        - Unknown
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity_candidate
+    attributes:
+      label: Severity Candidate
+      description: Initial triage estimate
+      options:
+        - P0 (critical safety/security risk)
+        - P1 (major functional regression)
+        - P2 (non-critical)
+    validations:
+      required: true
+
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware Summary
+      description: CPU, GPU, motherboard model, fan setup
+      placeholder: "CPU: ...\nGPU: ...\nMotherboard: ...\nFans: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      placeholder: "1. ...\n2. ...\n3. ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_actual
+    attributes:
+      label: Expected vs Actual
+      placeholder: "Expected: ...\nActual: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: support_bundle
+    attributes:
+      label: Support Bundle Path / Attachment
+      description: Required for beta triage. Include path or attach ZIP name.
+      placeholder: "Example: support-bundle-20260315T080100Z.zip"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Logs, screenshots, vendor tools running in background
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I attached or referenced a support bundle for this report.
+          required: true

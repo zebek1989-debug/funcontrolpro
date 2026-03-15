@@ -1,0 +1,13 @@
+tester_id,status,contact,board_vendor,board_model,support_mode_expected,os_version,beta_build,first_seen_utc,last_feedback_utc,notes
+beta-001,planned,,,,"Full Control",Windows 11,,,,
+beta-002,planned,,,,"Monitoring Only",Windows 11,,,,
+beta-003,planned,,,,"Full Control",Windows 11,,,,
+beta-004,planned,,,,"Monitoring Only",Windows 11,,,,
+beta-005,planned,,,,"Full Control",Windows 11,,,,
+beta-006,planned,,,,"Monitoring Only",Windows 11,,,,
+beta-007,planned,,,,"Full Control",Windows 11,,,,
+beta-008,planned,,,,"Monitoring Only",Windows 11,,,,
+beta-009,planned,,,,"Full Control",Windows 11,,,,
+beta-010,planned,,,,"Monitoring Only",Windows 11,,,,
+beta-011,planned,,,,Wildcard,Windows 11,,,,
+beta-012,planned,,,,Wildcard,Windows 11,,,,

@@ -980,7 +980,7 @@ Legenda statusów:
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 6.1 Zamknięta beta | MISSING | Brak procesu beta i metryk release-readiness. |
+| 6.1 Zamknięta beta | PARTIAL | Dodano pakiet operacyjny bety: plan rekrutacji i roster testerow (`docs/beta/tester-recruitment-plan.md`, `docs/beta/tester-roster.csv`), workflow feedback + triage P0/P1/P2 (`docs/beta/beta-feedback-triage.md`), szablon issue z wymaganym support bundle (`.github/ISSUE_TEMPLATE/beta-bug-report.yml`) oraz metryki i review template (`docs/beta/beta-metrics-log.csv`, `docs/beta/beta-metrics-review-template.md`) wraz ze skryptem gate-check (`scripts/beta/Calculate-BetaReadiness.ps1`). Brakuje wykonania rzeczywistej rundy zamknietej bety i uzupelnienia metryk danymi produkcyjnymi. |
 | 6.2 Release Candidate | MISSING | Brak checklisty RC, changelogu i tagowania RC. |
 | 6.3 Wydanie 1.0 | MISSING | Brak publicznych artefaktów wydania i procedur post-release. |
 
@@ -994,7 +994,7 @@ Legenda statusów:
 
 - Gotowe funkcjonalnie: kluczowy core faz 2.x oraz 3.2.
 - Częściowo gotowe: faza 1, 3.1, 3.3 i faza 4 (4.1-4.3).
-- Najwieksza luka: fazy 6.x oraz finalna walidacja E2E milestone 5.x na docelowym Windows.
+- Najwieksza luka: realizacja operacyjna fazy 6.x (realna zamknieta beta + decyzje Go/No-Go i publikacja 1.0).
 - brak otwartych krytycznych bugów bezpieczeństwa,
 - działający failsafe i recovery,
 - opublikowana lista kompatybilności,

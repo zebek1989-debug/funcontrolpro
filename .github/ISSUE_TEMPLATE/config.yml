@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Beta Operations Guide
+    url: https://github.com/zebek1989-debug/funcontrolpro/blob/main/docs/beta/README.md
+    about: Read closed beta workflow, triage and metrics process before filing.

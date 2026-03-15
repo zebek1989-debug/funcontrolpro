@@ -1,0 +1,2 @@
+date,sessions_total,sessions_crash_free,failsafe_events,p0_open,p1_open,p1_with_workaround,p2_open,top_issues_addressed,total_top_issues,notes
+2026-03-15,0,0,0,0,0,0,0,0,10,initial baseline row
