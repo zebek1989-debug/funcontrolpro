@@ -87,13 +87,14 @@ try {
         Write-Host "Detected WSL UNC path. dotnet commands will run via wsl.exe in distro '$($wslContext.Distro)'."
     }
 
-    Invoke-DotNetOrThrow `
-        -Arguments @("build", "--verbosity", "minimal") `
-        -StepName "dotnet build" `
-        -WslContext $wslContext
+    Invoke-DotNetOrThrow @{
+        Arguments = @("build", "--verbosity", "minimal")
+        StepName = "dotnet build"
+        WslContext = $wslContext
+    }
 
-    Invoke-DotNetOrThrow `
-        -Arguments @(
+    Invoke-DotNetOrThrow @{
+        Arguments = @(
             "test",
             $ProjectPath,
             "--verbosity",
@@ -102,12 +103,13 @@ try {
             "--no-restore",
             "--filter",
             "FullyQualifiedName~FanControlPro.Tests.Presentation."
-        ) `
-        -StepName "dotnet test (phase 4 presentation scope)"
-        -WslContext $wslContext
+        )
+        StepName = "dotnet test (phase 4 presentation scope)"
+        WslContext = $wslContext
+    }
 
-    Invoke-DotNetOrThrow `
-        -Arguments @(
+    Invoke-DotNetOrThrow @{
+        Arguments = @(
             "test",
             $ProjectPath,
             "--verbosity",
@@ -116,12 +118,13 @@ try {
             "--no-restore",
             "--filter",
             "FullyQualifiedName~TaskSchedulerAutostartServiceTests"
-        ) `
-        -StepName "dotnet test (phase 4 autostart scope)"
-        -WslContext $wslContext
+        )
+        StepName = "dotnet test (phase 4 autostart scope)"
+        WslContext = $wslContext
+    }
 
-    Invoke-DotNetOrThrow `
-        -Arguments @(
+    Invoke-DotNetOrThrow @{
+        Arguments = @(
             "test",
             $ProjectPath,
             "--verbosity",
@@ -130,9 +133,10 @@ try {
             "--no-restore",
             "--filter",
             "FullyQualifiedName~JsonApplicationSettingsServiceTests"
-        ) `
-        -StepName "dotnet test (phase 4 settings scope)"
-        -WslContext $wslContext
+        )
+        StepName = "dotnet test (phase 4 settings scope)"
+        WslContext = $wslContext
+    }
 
     $settingsPath = Join-Path $repoRoot "src/FanControlPro.Presentation/appsettings.json"
     $hardwareAccessDefault = Resolve-HardwareAccessDefault -SettingsPath $settingsPath
