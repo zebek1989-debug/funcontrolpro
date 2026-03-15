@@ -6,6 +6,7 @@ This folder contains QA documentation and datasets for milestone 5.x.
 
 - `hardware-matrix.csv` - machine-readable platform matrix.
 - `hardware-validation-checklist.md` - full validation procedure.
+- `asus-z490p-superio-write-checklist.md` - P1 checklist for safe Super I/O (Nuvoton) write enablement on ASUS Z490-P.
 - `vendor-conflict-test-matrix.md` - vendor conflict scenarios.
 - `hardware-test-report-template.md` - per-platform report template.
 - `performance-soak-playbook.md` - soak/performance runbook.

@@ -215,7 +215,7 @@ internal sealed class FakeProbe : IHardwareProbe
         _items = items;
     }
 
-    public Task<IReadOnlyList<HardwareProbeItem>> ProbeAsync(CancellationToken cancellationToken = default) 
+    public Task<IReadOnlyList<HardwareProbeItem>> ProbeAsync(CancellationToken cancellationToken = default)
         => Task.FromResult(_items);
 }
 
@@ -280,7 +280,7 @@ internal sealed class InMemoryHardwareCacheStore : IHardwareCacheStore
 
     public int SaveCalls { get; private set; }
 
-    public Task<DetectionResult?> LoadAsync(CancellationToken cancellationToken = default) 
+    public Task<DetectionResult?> LoadAsync(CancellationToken cancellationToken = default)
         => Task.FromResult(_cached);
 
     public Task SaveAsync(DetectionResult result, CancellationToken cancellationToken = default)

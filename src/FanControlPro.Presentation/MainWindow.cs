@@ -36,7 +36,10 @@ public class MainWindow : Window
         Height = 600;
         Background = new SolidColorBrush(Color.Parse("#F5F5F5"));
 
-        var mainPanel = new StackPanel { Orientation = Orientation.Vertical };
+        var mainGrid = new Grid
+        {
+            RowDefinitions = new RowDefinitions("Auto,*")
+        };
 
         var topBar = new Border
         {
@@ -51,10 +54,16 @@ public class MainWindow : Window
             }
         };
 
-        mainPanel.Children.Add(topBar);
-        mainPanel.Children.Add(_contentHost);
+        _contentHost.HorizontalAlignment = HorizontalAlignment.Stretch;
+        _contentHost.VerticalAlignment = VerticalAlignment.Stretch;
 
-        Content = mainPanel;
+        Grid.SetRow(topBar, 0);
+        Grid.SetRow(_contentHost, 1);
+
+        mainGrid.Children.Add(topBar);
+        mainGrid.Children.Add(_contentHost);
+
+        Content = mainGrid;
     }
 
     private async Task InitializeStartupViewAsync()

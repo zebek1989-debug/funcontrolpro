@@ -33,7 +33,8 @@ public static class ServiceCollectionExtensions
         Action<BackupRecoveryOptions>? configureBackupRecovery = null,
         Action<DiagnosticsOptions>? configureDiagnostics = null,
         Action<AutostartOptions>? configureAutostart = null,
-        Action<ApplicationSettingsStorageOptions>? configureAppSettings = null)
+        Action<ApplicationSettingsStorageOptions>? configureAppSettings = null,
+        Action<EcWriteSafetyOptions>? configureEcWriteSafety = null)
     {
         ArgumentNullException.ThrowIfNull(services);
 
@@ -97,6 +98,12 @@ public static class ServiceCollectionExtensions
             services.Configure(configureAppSettings);
         }
 
+        services.AddOptions<EcWriteSafetyOptions>();
+        if (configureEcWriteSafety is not null)
+        {
+            services.Configure(configureEcWriteSafety);
+        }
+
         services.TryAddSingleton<IHardwareProbe, LibreHardwareMonitorProbe>();
         services.TryAddSingleton<IHardwareCacheStore, HardwareJsonCacheStore>();
         services.TryAddSingleton<IHardwareDetector, HardwareDetector>();
@@ -116,6 +123,9 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ISupportBundleService, SupportBundleService>();
         services.TryAddSingleton<IAutostartService, TaskSchedulerAutostartService>();
         services.TryAddSingleton<IApplicationSettingsService, JsonApplicationSettingsService>();
+        services.TryAddSingleton<ISuperIoFanControlAccess, LibreHardwareMonitorSuperIoFanControlAccess>();
+        services.TryAddSingleton<IEcRegisterAccess, WinRing0EcRegisterAccess>();
+        services.TryAddSingleton<IChannelWriteCooldownGate, ChannelWriteCooldownGate>();
         services.TryAddSingleton<IWriteCapabilityValidator, WriteCapabilityValidator>();
         services.TryAddSingleton<IManualFanControlService, ManualFanControlService>();
         services.TryAddSingleton<ICurveEngine, CurveEngine>();

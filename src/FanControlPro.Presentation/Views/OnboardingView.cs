@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using FanControlPro.Application.Onboarding;
 using FanControlPro.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,15 @@ public class OnboardingView : UserControl
     {
         _viewModel = App.Host!.Services.GetRequiredService<OnboardingViewModel>();
         DataContext = _viewModel;
+
+        var readableForeground = new SolidColorBrush(Color.Parse("#1F2937"));
+        Styles.Add(new Style(x => x.OfType<TextBlock>())
+        {
+            Setters =
+            {
+                new Setter(TextBlock.ForegroundProperty, readableForeground)
+            }
+        });
 
         _contentPanel = new StackPanel { Spacing = 20, Margin = new Thickness(20) };
         _nextButton = new Button { Content = "Dalej", HorizontalAlignment = HorizontalAlignment.Right };

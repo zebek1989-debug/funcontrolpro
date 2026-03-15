@@ -162,7 +162,12 @@ public class DashboardView : UserControl
             Margin = new Thickness(0, 8, 0, 0)
         });
 
-        Content = new ScrollViewer { Content = root };
+        Content = new ScrollViewer
+        {
+            Content = root,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Visible,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
+        };
     }
 
     private static Border CreateOnboardingCard()

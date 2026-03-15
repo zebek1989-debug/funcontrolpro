@@ -3,11 +3,13 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Notifications;
 using Avalonia.Styling;
+using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
 using FanControlPro.Application.Configuration;
 using FanControlPro.Infrastructure.DependencyInjection;
 using FanControlPro.Presentation.Services;
 using FanControlPro.Presentation.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -42,7 +44,8 @@ namespace FanControlPro.Presentation
 
         public override void Initialize()
         {
-            // Resources = new();
+            Styles.Add(new FluentTheme());
+            RequestedThemeVariant = ThemeVariant.Light;
         }
 
         public override void OnFrameworkInitializationCompleted()
@@ -65,7 +68,9 @@ namespace FanControlPro.Presentation
                             .CreateLogger();
 
                         services.AddLogging(builder => builder.AddSerilog());
-                        services.AddHardwareMonitoring();
+                        services.AddHardwareMonitoring(
+                            configureEcWriteSafety: options =>
+                                context.Configuration.GetSection("EcWriteSafety").Bind(options));
 
                         services.AddSingleton<ITrayService, AvaloniaTrayService>();
                         services.AddSingleton<MainWindow>();
@@ -79,44 +84,52 @@ namespace FanControlPro.Presentation
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                try
-                {
-                    var startupRecovery = Host.Services.GetRequiredService<IStartupRecoveryService>();
-                    var recoveryResult = startupRecovery.EnsureHealthyStartupAsync().GetAwaiter().GetResult();
-                    Log.Information(
-                        "Startup recovery: healthyBefore={HealthyBefore}, recovered={Recovered}, fallback={Fallback}, message={Message}",
-                        recoveryResult.HealthyBeforeRecovery,
-                        recoveryResult.Recovered,
-                        recoveryResult.FallbackToSafeDefaults,
-                        recoveryResult.Message);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Startup recovery flow failed unexpectedly.");
-                }
+                var startupLite = HasArgument(desktop.Args, "--startup-lite", "--skip-startup-services", "--diag-startup");
 
-                try
+                if (!startupLite)
                 {
-                    var autostartService = Host.Services.GetRequiredService<IAutostartService>();
-                    var autostartOptions = Host.Services.GetRequiredService<IOptions<AutostartOptions>>().Value;
+                    try
+                    {
+                        var startupRecovery = Host.Services.GetRequiredService<IStartupRecoveryService>();
+                        var recoveryResult = startupRecovery.EnsureHealthyStartupAsync().GetAwaiter().GetResult();
+                        Log.Information(
+                            "Startup recovery: healthyBefore={HealthyBefore}, recovered={Recovered}, fallback={Fallback}, message={Message}",
+                            recoveryResult.HealthyBeforeRecovery,
+                            recoveryResult.Recovered,
+                            recoveryResult.FallbackToSafeDefaults,
+                            recoveryResult.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Startup recovery flow failed unexpectedly.");
+                    }
 
-                    var delay = TimeSpan.FromSeconds(Math.Max(0, autostartOptions.StartupDelaySeconds));
-                    autostartService
-                        .ConfigureAsync(
-                            autostartOptions.EnableAutostart,
-                            autostartOptions.StartMinimizedToTray,
-                            delay)
-                        .GetAwaiter()
-                        .GetResult();
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex, "Autostart integration failed to apply.");
+                    try
+                    {
+                        var autostartService = Host.Services.GetRequiredService<IAutostartService>();
+                        var autostartOptions = Host.Services.GetRequiredService<IOptions<AutostartOptions>>().Value;
+
+                        var delay = TimeSpan.FromSeconds(Math.Max(0, autostartOptions.StartupDelaySeconds));
+                        autostartService
+                            .ConfigureAsync(
+                                autostartOptions.EnableAutostart,
+                                autostartOptions.StartMinimizedToTray,
+                                delay)
+                            .GetAwaiter()
+                            .GetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning(ex, "Autostart integration failed to apply.");
+                    }
                 }
 
                 var mainWindow = Host.Services.GetRequiredService<MainWindow>();
                 var viewModel = Host.Services.GetRequiredService<DashboardViewModel>();
-                var trayService = Host.Services.GetRequiredService<ITrayService>();
+                var disableTray = HasArgument(desktop.Args, "--no-tray", "--disable-tray");
+                ITrayService trayService = disableTray
+                    ? new NullTrayService()
+                    : Host.Services.GetRequiredService<ITrayService>();
                 var applicationSettingsService = Host.Services.GetRequiredService<IApplicationSettingsService>();
                 var notificationManager = new WindowNotificationManager(mainWindow)
                 {
@@ -124,15 +137,24 @@ namespace FanControlPro.Presentation
                     MaxItems = 3
                 };
 
-                try
+                if (!startupLite)
                 {
-                    var currentSettings = applicationSettingsService.GetCurrentAsync().GetAwaiter().GetResult();
-                    ApplyTheme(currentSettings.Theme);
-                    _minimizeToTrayOnClose = currentSettings.MinimizeToTrayOnClose;
+                    try
+                    {
+                        var currentSettings = applicationSettingsService.GetCurrentAsync().GetAwaiter().GetResult();
+                        ApplyTheme(currentSettings.Theme);
+                        _minimizeToTrayOnClose = disableTray
+                            ? false
+                            : currentSettings.MinimizeToTrayOnClose;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning(ex, "Failed to load initial application settings for UI behavior.");
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Log.Warning(ex, "Failed to load initial application settings for UI behavior.");
+                    _minimizeToTrayOnClose = false;
                 }
 
                 mainWindow.DataContext = viewModel;
@@ -210,7 +232,9 @@ namespace FanControlPro.Presentation
                     Dispatcher.UIThread.Post(() =>
                     {
                         ApplyTheme(settings.Theme);
-                        _minimizeToTrayOnClose = settings.MinimizeToTrayOnClose;
+                        _minimizeToTrayOnClose = disableTray
+                            ? false
+                            : settings.MinimizeToTrayOnClose;
                         trayService.UpdateStatus(CreateTrayStatus(mainWindow, viewModel));
                     });
 
@@ -228,19 +252,25 @@ namespace FanControlPro.Presentation
 
                 trayService.UpdateProfiles(viewModel.ProfileOptions.ToArray(), viewModel.ActiveProfile);
                 trayService.UpdateStatus(CreateTrayStatus(mainWindow, viewModel));
-                trayService.Show();
 
                 MaybeNotifyVendorConflict(notificationManager);
                 MaybeNotifyFailsafe(notificationManager, viewModel.SafetyState, viewModel.SafetyStatusMessage);
                 MaybeNotifyTemperatureAlerts(notificationManager, viewModel.SafetyAlertsSummary);
 
-                if (ShouldStartMinimized(desktop.Args))
+                var startMinimized = ShouldStartMinimized(desktop.Args);
+                if (startMinimized)
                 {
                     HideMainWindow(mainWindow, trayService, viewModel);
                 }
                 else
                 {
                     ShowMainWindow(mainWindow, trayService, viewModel);
+                    _ = EnsureMainWindowVisibleAsync(mainWindow, trayService, viewModel);
+                }
+
+                if (!disableTray)
+                {
+                    trayService.Show();
                 }
 
                 desktop.ShutdownRequested += (_, _) =>
@@ -268,9 +298,55 @@ namespace FanControlPro.Presentation
                 return false;
             }
 
+            if (args.Any(arg =>
+                    string.Equals(arg, "--force-visible", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(arg, "--show-main-window", StringComparison.OrdinalIgnoreCase)))
+            {
+                return false;
+            }
+
             return args.Any(arg =>
                 string.Equals(arg, "--start-minimized", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(arg, "--start-to-tray", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool HasArgument(IReadOnlyList<string>? args, params string[] acceptedValues)
+        {
+            if (args is null || args.Count == 0 || acceptedValues.Length == 0)
+            {
+                return false;
+            }
+
+            foreach (var arg in args)
+            {
+                foreach (var acceptedValue in acceptedValues)
+                {
+                    if (string.Equals(arg, acceptedValue, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static async Task EnsureMainWindowVisibleAsync(
+            MainWindow window,
+            ITrayService trayService,
+            DashboardViewModel viewModel)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(1250)).ConfigureAwait(false);
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (window.IsVisible)
+                {
+                    return;
+                }
+
+                ShowMainWindow(window, trayService, viewModel);
+            });
         }
 
         private static void ShowMainWindow(MainWindow window, ITrayService trayService, DashboardViewModel viewModel)
@@ -436,7 +512,7 @@ namespace FanControlPro.Presentation
             {
                 ApplicationTheme.Light => ThemeVariant.Light,
                 ApplicationTheme.Dark => ThemeVariant.Dark,
-                _ => ThemeVariant.Default
+                _ => ThemeVariant.Light
             };
         }
     }
