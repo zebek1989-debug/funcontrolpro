@@ -24,6 +24,44 @@ function Invoke-NativeOrThrow {
     }
 }
 
+function Resolve-WslContext {
+    param([string]$WindowsPath)
+
+    if ($WindowsPath -match "^\\\\wsl(?:\.localhost)?\\([^\\]+)\\(.+)$") {
+        $distro = $Matches[1]
+        $linuxSuffix = $Matches[2] -replace "\\", "/"
+        $linuxPath = "/$linuxSuffix"
+
+        return [pscustomobject]@{
+            Distro = $distro
+            LinuxPath = $linuxPath
+        }
+    }
+
+    return $null
+}
+
+function Invoke-DotNetOrThrow {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$Arguments,
+        [Parameter(Mandatory = $true)]
+        [string]$StepName,
+        [pscustomobject]$WslContext
+    )
+
+    if ($null -eq $WslContext) {
+        Invoke-NativeOrThrow -FilePath "dotnet" -Arguments $Arguments -StepName $StepName
+        return
+    }
+
+    & wsl.exe -d $WslContext.Distro --cd $WslContext.LinuxPath --exec dotnet @Arguments
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        throw "$StepName failed with exit code $exitCode."
+    }
+}
+
 function Resolve-HardwareAccessDefault {
     param([string]$SettingsPath)
 
@@ -39,27 +77,56 @@ function Resolve-HardwareAccessDefault {
     return [string]$json.EcWriteSafety.EnableHardwareAccess
 }
 
-$repoRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")
+$repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).ProviderPath
+$wslContext = Resolve-WslContext -WindowsPath $repoRoot
 Push-Location $repoRoot
 
 try {
     Write-Host "Phase 4 readiness: build + targeted tests"
+    if ($null -ne $wslContext) {
+        Write-Host "Detected WSL UNC path. dotnet commands will run via wsl.exe in distro '$($wslContext.Distro)'."
+    }
 
-    Invoke-NativeOrThrow `
-        -FilePath "dotnet" `
+    Invoke-DotNetOrThrow `
         -Arguments @("build", "--verbosity", "minimal") `
-        -StepName "dotnet build"
+        -StepName "dotnet build" `
+        -WslContext $wslContext
 
-    $filter = "(" +
-        "FullyQualifiedName~FanControlPro.Tests.Presentation." +
-        "|FullyQualifiedName~TaskSchedulerAutostartServiceTests" +
-        "|FullyQualifiedName~JsonApplicationSettingsServiceTests" +
-        ")"
+    Invoke-DotNetOrThrow `
+        -Arguments @(
+            "test",
+            $ProjectPath,
+            "--verbosity",
+            "minimal",
+            "--filter",
+            "FullyQualifiedName~FanControlPro.Tests.Presentation."
+        ) `
+        -StepName "dotnet test (phase 4 presentation scope)"
+        -WslContext $wslContext
 
-    Invoke-NativeOrThrow `
-        -FilePath "dotnet" `
-        -Arguments @("test", $ProjectPath, "--verbosity", "minimal", "--filter", $filter) `
-        -StepName "dotnet test (phase 4 scope)"
+    Invoke-DotNetOrThrow `
+        -Arguments @(
+            "test",
+            $ProjectPath,
+            "--verbosity",
+            "minimal",
+            "--filter",
+            "FullyQualifiedName~TaskSchedulerAutostartServiceTests"
+        ) `
+        -StepName "dotnet test (phase 4 autostart scope)"
+        -WslContext $wslContext
+
+    Invoke-DotNetOrThrow `
+        -Arguments @(
+            "test",
+            $ProjectPath,
+            "--verbosity",
+            "minimal",
+            "--filter",
+            "FullyQualifiedName~JsonApplicationSettingsServiceTests"
+        ) `
+        -StepName "dotnet test (phase 4 settings scope)"
+        -WslContext $wslContext
 
     $settingsPath = Join-Path $repoRoot "src/FanControlPro.Presentation/appsettings.json"
     $hardwareAccessDefault = Resolve-HardwareAccessDefault -SettingsPath $settingsPath
