@@ -77,7 +77,7 @@ function Get-MatrixSummary {
         throw "Matrix file not found: $Path"
     }
 
-    $rows = Import-Csv -LiteralPath $Path
+    $rows = @(Import-Csv -LiteralPath $Path)
     if (-not $rows -or $rows.Count -eq 0) {
         throw "Matrix file is empty: $Path"
     }
@@ -92,9 +92,9 @@ function Get-MatrixSummary {
             $_.SupportTarget -eq "MonitoringOnly" -and $_.ValidationStatus -eq "Validated"
         })
 
-    $statusGroups = $rows |
+    $statusGroups = @($rows |
         Group-Object ValidationStatus |
-        Sort-Object Name
+        Sort-Object Name)
 
     return [pscustomobject]@{
         TotalRows = $rows.Count
@@ -116,14 +116,14 @@ function Get-PerformanceBaselineSummary {
         throw "Performance baseline file not found: $Path"
     }
 
-    $rows = Import-Csv -LiteralPath $Path
+    $rows = @(Import-Csv -LiteralPath $Path)
     if (-not $rows -or $rows.Count -eq 0) {
         throw "Performance baseline file is empty: $Path"
     }
 
-    $statusGroups = $rows |
+    $statusGroups = @($rows |
         Group-Object Result |
-        Sort-Object Name
+        Sort-Object Name)
 
     $latest = $rows |
         Sort-Object DateUtc -Descending |
