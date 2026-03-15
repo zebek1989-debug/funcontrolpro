@@ -141,16 +141,29 @@ else {
 $sourceOutputDirectory = Join-Path -Path $projectDirectory -ChildPath "bin\Release\net8.0"
 $localRunDirectory = Prepare-LocalRunDirectory -SourceDirectory $sourceOutputDirectory -RunId $timestamp
 $exePath = Join-Path -Path $localRunDirectory -ChildPath "FanControlPro.Presentation.exe"
-if (-not (Test-Path -LiteralPath $exePath)) {
-    throw "Executable not found in staged local directory: $exePath"
-}
+$dllPath = Join-Path -Path $localRunDirectory -ChildPath "FanControlPro.Presentation.dll"
+$startMode = ""
 
 Write-Host "Starting FanControl Pro soak run (local stage)..."
-$process = Start-Process `
-    -FilePath $exePath `
-    -ArgumentList @("--start-minimized") `
-    -WorkingDirectory (Split-Path -Path $exePath -Parent) `
-    -PassThru
+if (Test-Path -LiteralPath $exePath) {
+    $process = Start-Process `
+        -FilePath $exePath `
+        -ArgumentList @("--start-minimized") `
+        -WorkingDirectory (Split-Path -Path $exePath -Parent) `
+        -PassThru
+    $startMode = "exe"
+}
+elseif (Test-Path -LiteralPath $dllPath) {
+    $process = Start-Process `
+        -FilePath "dotnet" `
+        -ArgumentList @($dllPath, "--start-minimized") `
+        -WorkingDirectory (Split-Path -Path $dllPath -Parent) `
+        -PassThru
+    $startMode = "dotnet-dll"
+}
+else {
+    throw "Neither executable nor DLL found in staged local directory: $localRunDirectory"
+}
 
 $samples = New-Object System.Collections.Generic.List[object]
 $startUtc = [DateTimeOffset]::UtcNow
@@ -223,6 +236,8 @@ $summary = [pscustomobject]@{
     RunTimestampUtc = $startUtc.ToString("o")
     ProjectPath = "$projectFullPath"
     ExecutablePath = "$exePath"
+    DllPath = "$dllPath"
+    StartMode = "$startMode"
     DurationHours = $DurationHours
     SampleIntervalSeconds = $SampleIntervalSeconds
     SampleCount = $samples.Count
