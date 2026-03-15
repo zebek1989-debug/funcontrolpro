@@ -11,7 +11,7 @@ if (-not (Test-Path -LiteralPath $Path)) {
     throw "Matrix file not found: $Path"
 }
 
-$rows = Import-Csv -LiteralPath $Path
+$rows = @(Import-Csv -LiteralPath $Path)
 
 if (-not $rows -or $rows.Count -eq 0) {
     throw "Matrix file is empty: $Path"
@@ -29,9 +29,9 @@ foreach ($column in $requiredColumns) {
     }
 }
 
-$duplicates = $rows |
+$duplicates = @($rows |
     Group-Object ConfigurationId |
-    Where-Object { $_.Count -gt 1 }
+    Where-Object { $_.Count -gt 1 })
 
 if ($duplicates.Count -gt 0) {
     $duplicateIds = ($duplicates | ForEach-Object { $_.Name }) -join ", "
