@@ -30,6 +30,7 @@
     <ProjectReference Include="..\..\src\FanControlPro.Domain\FanControlPro.Domain.csproj" />
     <ProjectReference Include="..\..\src\FanControlPro.Application\FanControlPro.Application.csproj" />
     <ProjectReference Include="..\..\src\FanControlPro.Infrastructure\FanControlPro.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\FanControlPro.Presentation\FanControlPro.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

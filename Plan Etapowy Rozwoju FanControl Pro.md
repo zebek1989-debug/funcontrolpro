@@ -921,7 +921,7 @@
 
 ---
 
-## AUDYT ZGODNOŚCI Z PLANEM (stan na 2026-03-15, po commit `f6d3097`)
+## AUDYT ZGODNOŚCI Z PLANEM (stan na 2026-03-15, aktualizacja lokalna)
 
 Legenda statusów:
 - `DONE` = wdrożone i potwierdzone lokalnym build/test lub działaniem runtime.
@@ -931,7 +931,7 @@ Legenda statusów:
 ### Snapshot jakości
 
 - `dotnet build` -> PASS (0 błędów, 0 ostrzeżeń)
-- `dotnet test` -> PASS (**87/87**)
+- `dotnet test` -> PASS (**97/97**)
 - UI uruchamia się i działa (onboarding + dashboard, poprawiony theme/kontrast/scroll)
 - status projektu: **RC (~90-92%)**, gotowy do finalnego domknięcia hardware validation
 
@@ -948,7 +948,7 @@ Legenda statusów:
 |-----------|--------|-----------|
 | 1.1 Wykrywanie sprzętu | PARTIAL | Detekcja + klasyfikacja + cache działają; brak pełnego, udokumentowanego cross-checku z HWiNFO na macierzy docelowej. |
 | 1.2 Odczyt sensorów | PARTIAL | Monitoring loop i sanity checks są; brak formalnych runów 24h i finalnych metryk wydajnościowych. |
-| 1.3 Dashboard | PARTIAL | Dashboard działa stabilnie; nadal brak formalnych testów UI dla różnych rozdzielczości/scenariuszy E2E. |
+| 1.3 Dashboard | PARTIAL | Dashboard działa stabilnie; są testy ViewModel (onboarding + dashboard), ale nadal brak formalnych testów UI dla różnych rozdzielczości/scenariuszy E2E. |
 
 ### Faza 2
 
@@ -972,8 +972,8 @@ Legenda statusów:
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
 | 4.1 System Tray i autostart | PARTIAL | Tray/autostart są wdrożone; wymaga finalnej walidacji E2E autostartu po logowaniu na docelowym Windows. |
-| 4.2 Onboarding i klasyfikacja sprzętu | PARTIAL | Wizard/consent/empty-states działają; wymaga końcowej walidacji UX i flow hardware-in-the-loop. |
-| 4.3 Ustawienia aplikacji | PARTIAL | Settings UI + persistence + live apply działają; do domknięcia testy E2E restartu i scenariusze użytkowe. |
+| 4.2 Onboarding i klasyfikacja sprzętu | PARTIAL | Wizard/consent/empty-states działają i mają pokrycie testami ViewModel; wymaga końcowej walidacji UX i flow hardware-in-the-loop. |
+| 4.3 Ustawienia aplikacji | PARTIAL | Settings UI + persistence + live apply działają i mają testy ViewModel zapisu/walidacji; do domknięcia testy E2E restartu i scenariusze użytkowe. |
 
 ### Faza 5
 
@@ -995,7 +995,7 @@ Legenda statusów:
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 4.2 Integration Tests (sekcja dodatkowa) | DONE | Suite testowa działa; obecnie **87 testów** przechodzi lokalnie. |
+| 4.2 Integration Tests (sekcja dodatkowa) | DONE | Suite testowa działa; obecnie **97 testów** przechodzi lokalnie. |
 
 ### Podsumowanie audytu
 
