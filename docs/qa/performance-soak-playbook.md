@@ -5,7 +5,7 @@ Last updated: 2026-03-15
 ## Objective
 
 Standardize how we execute:
-- 24h monitoring soak test,
+- 24 minuts monitoring soak test,
 - control stress scenarios,
 - baseline capture for CPU/RAM/startup,
 - crash diagnostics review.
@@ -40,6 +40,19 @@ Expected outputs:
 - `process-samples.csv`
 - `summary.json`
 - `summary.txt`
+
+## Baseline CSV Update (after soak)
+
+After a soak run, update `docs/qa/performance-baselines.csv` automatically:
+
+```powershell
+pwsh -NoProfile -File scripts/performance/Update-PerformanceBaselinesFromLatestRun.ps1 `
+  -PerfArtifactsRoot artifacts/perf `
+  -BaselinesPath docs/qa/performance-baselines.csv `
+  -ConfigurationId FC-001 `
+  -BuildVersion main `
+  -RemovePlaceholders
+```
 
 ## Stress Scenarios (Control And Profiles)
 

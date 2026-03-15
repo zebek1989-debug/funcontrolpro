@@ -39,6 +39,17 @@ pwsh -NoProfile -File scripts/performance/Run-Phase52Soak.ps1 `
   -OutputDirectory artifacts/perf
 ```
 
+Update baseline CSV from latest soak artifact:
+
+```powershell
+pwsh -NoProfile -File scripts/performance/Update-PerformanceBaselinesFromLatestRun.ps1 `
+  -PerfArtifactsRoot artifacts/perf `
+  -BaselinesPath docs/qa/performance-baselines.csv `
+  -ConfigurationId FC-001 `
+  -BuildVersion main `
+  -RemovePlaceholders
+```
+
 ## Phase 4 Readiness Script
 
 ```powershell
