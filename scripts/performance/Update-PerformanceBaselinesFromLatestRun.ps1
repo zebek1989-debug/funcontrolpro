@@ -47,6 +47,35 @@ function Get-PeakCpuPercent {
         [double]$SampleIntervalSeconds
     )
 
+    function Convert-ToDoubleSafe {
+        param([object]$Value)
+
+        if ($null -eq $Value) {
+            return 0.0
+        }
+
+        $text = [string]$Value
+        $styles = [System.Globalization.NumberStyles]::Float
+        $invariant = [System.Globalization.CultureInfo]::InvariantCulture
+        $current = [System.Globalization.CultureInfo]::CurrentCulture
+        $parsed = 0.0
+
+        if ([double]::TryParse($text, $styles, $invariant, [ref]$parsed)) {
+            return $parsed
+        }
+
+        if ([double]::TryParse($text, $styles, $current, [ref]$parsed)) {
+            return $parsed
+        }
+
+        $normalized = $text -replace ",", "."
+        if ([double]::TryParse($normalized, $styles, $invariant, [ref]$parsed)) {
+            return $parsed
+        }
+
+        throw "Failed to parse numeric value '$text' from $SamplesPath"
+    }
+
     $samples = @(Import-Csv -LiteralPath $SamplesPath)
     if ($samples.Count -lt 2 -or $SampleIntervalSeconds -le 0) {
         return ""
@@ -54,8 +83,8 @@ function Get-PeakCpuPercent {
 
     $peak = 0.0
     for ($i = 1; $i -lt $samples.Count; $i++) {
-        $prevCpu = [double]$samples[$i - 1].CpuSeconds
-        $currCpu = [double]$samples[$i].CpuSeconds
+        $prevCpu = Convert-ToDoubleSafe -Value $samples[$i - 1].CpuSeconds
+        $currCpu = Convert-ToDoubleSafe -Value $samples[$i].CpuSeconds
         $delta = $currCpu - $prevCpu
         if ($delta -lt 0) {
             continue
@@ -67,7 +96,7 @@ function Get-PeakCpuPercent {
         }
     }
 
-    return [Math]::Round($peak, 3).ToString()
+    return [Math]::Round($peak, 3).ToString([System.Globalization.CultureInfo]::InvariantCulture)
 }
 
 function Resolve-RunResult {

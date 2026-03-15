@@ -1,10 +1,12 @@
 param(
     [string]$ProjectPath = "src/FanControlPro.Presentation/FanControlPro.Presentation.csproj",
     [string]$OutputDirectory = "artifacts/perf",
-    [int]$DurationHours = 24,
+    [double]$DurationHours = 24,
+    [int]$DurationMinutes = 0,
     [int]$SampleIntervalSeconds = 30,
     [int]$MaxRamMb = 1200,
-    [int]$MaxErrorLines = 20
+    [int]$MaxErrorLines = 20,
+    [switch]$SkipBuild
 )
 
 $ErrorActionPreference = "Stop"
@@ -54,6 +56,32 @@ function Invoke-NativeOrThrow {
     }
 }
 
+function Get-LogSignalCounts {
+    param([string]$LogsRoot)
+
+    $errorLines = 0
+    $failsafeLines = 0
+
+    if (Test-Path -LiteralPath $LogsRoot) {
+        $logFiles = Get-ChildItem -Path $LogsRoot -Filter "app-*.log" -File | Sort-Object LastWriteTimeUtc -Descending
+        foreach ($logFile in $logFiles) {
+            $content = Get-Content -LiteralPath $logFile.FullName -ErrorAction SilentlyContinue
+            if ($null -eq $content) {
+                continue
+            }
+
+            # Count only top-level log events (not multiline stack traces) to avoid inflated error counts.
+            $errorLines += @($content | Where-Object { $_ -match "^\d{4}-\d{2}-\d{2} .* \[(ERR|FTL)\]" }).Count
+            $failsafeLines += @($content | Where-Object { $_ -match "^\d{4}-\d{2}-\d{2} .* \[(INF|WRN|ERR|FTL)\].*(Failsafe|Emergency|Shutdown)" }).Count
+        }
+    }
+
+    return [pscustomobject]@{
+        ErrorLines = $errorLines
+        FailsafeLines = $failsafeLines
+    }
+}
+
 function Prepare-LocalRunDirectory {
     param(
         [Parameter(Mandatory = $true)]
@@ -77,12 +105,23 @@ function Prepare-LocalRunDirectory {
     return $targetDirectory
 }
 
-if ($DurationHours -lt 1) {
-    throw "DurationHours must be >= 1."
-}
-
 if ($SampleIntervalSeconds -lt 5) {
     throw "SampleIntervalSeconds must be >= 5."
+}
+
+$runDuration = if ($DurationMinutes -gt 0) {
+    if ($DurationMinutes -lt 5) {
+        throw "DurationMinutes must be >= 5."
+    }
+
+    [TimeSpan]::FromMinutes($DurationMinutes)
+}
+else {
+    if ($DurationHours -lt 0.1) {
+        throw "DurationHours must be >= 0.1 (6 minutes)."
+    }
+
+    [TimeSpan]::FromHours($DurationHours)
 }
 
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).ProviderPath
@@ -108,34 +147,39 @@ Write-Host "Building project..."
 $projectDirectory = Split-Path -Path $projectFullPath -Parent
 $projectLinuxPath = Convert-WindowsWslPathToLinuxPath -WindowsPath $projectFullPath
 
-if ($null -ne $wslContext -and -not [string]::IsNullOrWhiteSpace($projectLinuxPath)) {
-    Write-Host "Detected WSL UNC path. Building via wsl.exe in distro '$($wslContext.Distro)'."
-    Invoke-NativeOrThrow `
-        -FilePath "wsl.exe" `
-        -Arguments @(
-            "-d",
-            $wslContext.Distro,
-            "--cd",
-            $wslContext.LinuxPath,
-            "--exec",
-            "dotnet",
-            "build",
-            $projectLinuxPath,
-            "-c",
-            "Release"
-        ) `
-        -StepName "dotnet build (wsl)"
+if (-not $SkipBuild) {
+    if ($null -ne $wslContext -and -not [string]::IsNullOrWhiteSpace($projectLinuxPath)) {
+        Write-Host "Detected WSL UNC path. Building via wsl.exe in distro '$($wslContext.Distro)'."
+        Invoke-NativeOrThrow `
+            -FilePath "wsl.exe" `
+            -Arguments @(
+                "-d",
+                $wslContext.Distro,
+                "--cd",
+                $wslContext.LinuxPath,
+                "--exec",
+                "dotnet",
+                "build",
+                $projectLinuxPath,
+                "-c",
+                "Release"
+            ) `
+            -StepName "dotnet build (wsl)"
+    }
+    else {
+        Invoke-NativeOrThrow `
+            -FilePath "dotnet" `
+            -Arguments @(
+                "build",
+                $projectFullPath,
+                "-c",
+                "Release"
+            ) `
+            -StepName "dotnet build"
+    }
 }
 else {
-    Invoke-NativeOrThrow `
-        -FilePath "dotnet" `
-        -Arguments @(
-            "build",
-            $projectFullPath,
-            "-c",
-            "Release"
-        ) `
-        -StepName "dotnet build"
+    Write-Host "Skipping build step (-SkipBuild)."
 }
 
 $sourceOutputDirectory = Join-Path -Path $projectDirectory -ChildPath "bin\Release\net8.0"
@@ -167,7 +211,9 @@ else {
 
 $samples = New-Object System.Collections.Generic.List[object]
 $startUtc = [DateTimeOffset]::UtcNow
-$endUtc = $startUtc.AddHours($DurationHours)
+$endUtc = $startUtc.Add($runDuration)
+$logsRoot = Join-Path $env:APPDATA "FanControlPro\logs"
+$baselineLogCounts = Get-LogSignalCounts -LogsRoot $logsRoot
 
 try {
     while ([DateTimeOffset]::UtcNow -lt $endUtc) {
@@ -215,22 +261,9 @@ $avgRamMb = [Math]::Round((($samples | Measure-Object -Property WorkingSetMb -Av
 $peakRamMb = [Math]::Round((($samples | Measure-Object -Property WorkingSetMb -Maximum).Maximum), 2)
 $peakCpuSeconds = [Math]::Round((($samples | Measure-Object -Property CpuSeconds -Maximum).Maximum), 3)
 
-$logsRoot = Join-Path $env:APPDATA "FanControlPro\logs"
-$errorLines = 0
-$failsafeLines = 0
-
-if (Test-Path -LiteralPath $logsRoot) {
-    $logFiles = Get-ChildItem -Path $logsRoot -Filter "app-*.log" -File | Sort-Object LastWriteTimeUtc -Descending
-    foreach ($logFile in $logFiles) {
-        $content = Get-Content -LiteralPath $logFile.FullName -ErrorAction SilentlyContinue
-        if ($null -eq $content) {
-            continue
-        }
-
-        $errorLines += @($content | Select-String -Pattern "\[ERR\]|Error|Unhandled|Exception").Count
-        $failsafeLines += @($content | Select-String -Pattern "Failsafe|Emergency|Shutdown").Count
-    }
-}
+$finalLogCounts = Get-LogSignalCounts -LogsRoot $logsRoot
+$errorLines = [Math]::Max(0, $finalLogCounts.ErrorLines - $baselineLogCounts.ErrorLines)
+$failsafeLines = [Math]::Max(0, $finalLogCounts.FailsafeLines - $baselineLogCounts.FailsafeLines)
 
 $summary = [pscustomobject]@{
     RunTimestampUtc = $startUtc.ToString("o")
@@ -238,7 +271,8 @@ $summary = [pscustomobject]@{
     ExecutablePath = "$exePath"
     DllPath = "$dllPath"
     StartMode = "$startMode"
-    DurationHours = $DurationHours
+    DurationHours = [Math]::Round($runDuration.TotalHours, 4)
+    DurationMinutes = [Math]::Round($runDuration.TotalMinutes, 0)
     SampleIntervalSeconds = $SampleIntervalSeconds
     SampleCount = $samples.Count
     AvgCpuPercent = $avgCpuPercent

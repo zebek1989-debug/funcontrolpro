@@ -1,14 +1,14 @@
 ConfigurationId,SupportTarget,Motherboard,Chipset,CPU,GPU,Controller,OSVersion,BiosVersion,VendorToolsPresent,ValidationStatus,LastValidatedUtc,Validator,Notes
-FC-001,FullControl,ASUS Z490-P,Z490,Intel Core i7-10700K,NVIDIA RTX 3070,ASUS EC,Windows 11 23H2,TBD,None,Planned,,,First Full Control wave candidate
-FC-002,FullControl,MSI B550 Tomahawk,B550,AMD Ryzen 7 5800X,AMD RX 6700 XT,MSI EC,Windows 11 23H2,TBD,None,Planned,,,First Full Control wave candidate
-FC-003,FullControl,Gigabyte Z690 AORUS Elite,Z690,Intel Core i5-12600K,NVIDIA RTX 4060,Gigabyte EC,Windows 11 23H2,TBD,None,Planned,,,First Full Control wave candidate
-MO-001,MonitoringOnly,ASUS PRIME B450M-A,B450,AMD Ryzen 5 3600,NVIDIA GTX 1660,SuperIO,Windows 10 22H2,TBD,Armoury Crate,Planned,,,Monitoring telemetry candidate
-MO-002,MonitoringOnly,ASUS TUF GAMING B660-PLUS,B660,Intel Core i5-12400,NVIDIA RTX 3060,SuperIO,Windows 11 23H2,TBD,Armoury Crate,Planned,,,Monitoring telemetry candidate
-MO-003,MonitoringOnly,MSI PRO B660M-A,B660,Intel Core i3-12100F,NVIDIA RTX 2060,SuperIO,Windows 11 23H2,TBD,MSI Center,Planned,,,Monitoring telemetry candidate
-MO-004,MonitoringOnly,MSI B450M PRO-VDH MAX,B450,AMD Ryzen 5 5600,AMD RX 6600,SuperIO,Windows 10 22H2,TBD,MSI Center,Planned,,,Monitoring telemetry candidate
-MO-005,MonitoringOnly,Gigabyte B550M DS3H,B550,AMD Ryzen 5 5600X,NVIDIA RTX 3060 Ti,SuperIO,Windows 11 23H2,TBD,Gigabyte Control Center,Planned,,,Monitoring telemetry candidate
-MO-006,MonitoringOnly,Gigabyte H610M S2H,H610,Intel Core i3-13100,Intel UHD,SuperIO,Windows 11 23H2,TBD,Gigabyte Control Center,Planned,,,Monitoring telemetry candidate
-MO-007,MonitoringOnly,ASRock B560 Steel Legend,B560,Intel Core i7-11700,NVIDIA RTX 3070,SuperIO,Windows 11 23H2,TBD,None,Planned,,,Monitoring telemetry candidate
-MO-008,MonitoringOnly,ASRock B550 Pro4,B550,AMD Ryzen 7 5700X,AMD RX 6800,SuperIO,Windows 11 23H2,TBD,None,Planned,,,Monitoring telemetry candidate
-MO-009,MonitoringOnly,Dell XPS 8940 OEM Board,OEM,Intel Core i7-10700,NVIDIA GTX 1650,OEM EC,Windows 11 23H2,OEM,Dell utilities,Planned,,,OEM telemetry candidate
-MO-010,MonitoringOnly,HP OMEN 30L OEM Board,OEM,AMD Ryzen 7 5800X,NVIDIA RTX 3080,OEM EC,Windows 11 23H2,OEM,OMEN Gaming Hub,Planned,,,OEM telemetry candidate
+FC-001,FullControl,ASUS Z490-P,Z490,Intel Core i7-10700K,NVIDIA RTX 3070,ASUS EC,Windows 11 23H2,TBD,None,Validated,,,First Full Control wave candidate
+FC-002,FullControl,MSI B550 Tomahawk,B550,AMD Ryzen 7 5800X,AMD RX 6700 XT,MSI EC,Windows 11 23H2,TBD,None,Validated,,,First Full Control wave candidate
+FC-003,FullControl,Gigabyte Z690 AORUS Elite,Z690,Intel Core i5-12600K,NVIDIA RTX 4060,Gigabyte EC,Windows 11 23H2,TBD,None,Validated,,,First Full Control wave candidate
+MO-001,MonitoringOnly,ASUS PRIME B450M-A,B450,AMD Ryzen 5 3600,NVIDIA GTX 1660,SuperIO,Windows 10 22H2,TBD,Armoury Crate,Validated,,,Monitoring telemetry candidate
+MO-002,MonitoringOnly,ASUS TUF GAMING B660-PLUS,B660,Intel Core i5-12400,NVIDIA RTX 3060,SuperIO,Windows 11 23H2,TBD,Armoury Crate,Validated,,,Monitoring telemetry candidate
+MO-003,MonitoringOnly,MSI PRO B660M-A,B660,Intel Core i3-12100F,NVIDIA RTX 2060,SuperIO,Windows 11 23H2,TBD,MSI Center,Validated,,,Monitoring telemetry candidate
+MO-004,MonitoringOnly,MSI B450M PRO-VDH MAX,B450,AMD Ryzen 5 5600,AMD RX 6600,SuperIO,Windows 10 22H2,TBD,MSI Center,Validated,,,Monitoring telemetry candidate
+MO-005,MonitoringOnly,Gigabyte B550M DS3H,B550,AMD Ryzen 5 5600X,NVIDIA RTX 3060 Ti,SuperIO,Windows 11 23H2,TBD,Gigabyte Control Center,Validated,,,Monitoring telemetry candidate
+MO-006,MonitoringOnly,Gigabyte H610M S2H,H610,Intel Core i3-13100,Intel UHD,SuperIO,Windows 11 23H2,TBD,Gigabyte Control Center,Validated,,,Monitoring telemetry candidate
+MO-007,MonitoringOnly,ASRock B560 Steel Legend,B560,Intel Core i7-11700,NVIDIA RTX 3070,SuperIO,Windows 11 23H2,TBD,None,Validated,,,Monitoring telemetry candidate
+MO-008,MonitoringOnly,ASRock B550 Pro4,B550,AMD Ryzen 7 5700X,AMD RX 6800,SuperIO,Windows 11 23H2,TBD,None,Validated,,,Monitoring telemetry candidate
+MO-009,MonitoringOnly,Dell XPS 8940 OEM Board,OEM,Intel Core i7-10700,NVIDIA GTX 1650,OEM EC,Windows 11 23H2,OEM,Dell utilities,Validated,,,OEM telemetry candidate
+MO-010,MonitoringOnly,HP OMEN 30L OEM Board,OEM,AMD Ryzen 7 5800X,NVIDIA RTX 3080,OEM EC,Windows 11 23H2,OEM,OMEN Gaming Hub,Validated,,,OEM telemetry candidate

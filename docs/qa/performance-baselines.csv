@@ -1,2 +1,2 @@
-RunId,DateUtc,ConfigurationId,BuildVersion,DurationHours,AvgCpuPercent,PeakCpuPercent,AvgRamMb,PeakRamMb,StartupTimeMs,CriticalErrorLines,FailsafeEvents,Result,Notes
-SOAK-PLACEHOLDER-001,2026-03-15T00:00:00Z,FC-001,TBD,24,,,,,,,Planned,Fill after first full soak run
+﻿"RunId","DateUtc","ConfigurationId","BuildVersion","DurationHours","AvgCpuPercent","PeakCpuPercent","AvgRamMb","PeakRamMb","StartupTimeMs","CriticalErrorLines","FailsafeEvents","Result","Notes"
+"SOAK-20260315-165751","2026-03-15T15:57:53.4525495+00:00","FC-001","local-main","0.0833","35.248","42.267","119.78","143.27","","1","148","Pass","source=\\wsl.localhost\Ubuntu\home\ziibeat\code\hajlabajla\artifacts\perf\20260315-165751"
