@@ -87,3 +87,30 @@ Jednocześnie:
 - `dotnet test` -> PASS (110/110)
 - ręczne uruchomienie aplikacji -> działa, widoczne UI
 - zweryfikowane: ścieżki EC/Super I/O, konfiguracja bezpieczeństwa, stan repo
+
+---
+
+## 7) Aktualizacja końcowa (2026-03-15, po domknięciu etapów)
+
+Po dodatkowym domknięciu etapów 4-6:
+
+- `dotnet build FanControlPro.sln -c Release` -> PASS
+- `dotnet test FanControlPro.sln -c Release` -> PASS (110/110)
+- `scripts/qa/Validate-Phase4Readiness.ps1` -> PASS
+- `scripts/qa/Validate-Phase5Readiness.ps1 -RequireValidatedMatrix` -> PASS
+- `scripts/qa/Validate-Phase6Readiness.ps1` -> GO
+
+Zrealizowane aktualizacje:
+
+1. Faza 5:
+   - Zapisany finalny baseline wydajności (`docs/qa/performance-baselines.csv`).
+   - Zsynchronizowany publiczny status kompatybilności (`supported-hardware.md`).
+2. Faza 6:
+   - Dodany skrypt walidacji końcowej (`scripts/qa/Validate-Phase6Readiness.ps1`).
+   - Uzupełnione checklisty/raporty RC i 72h.
+   - Beta metrics domknięty lokalnym snapshotem QA.
+
+Aktualny status operacyjny:
+
+- Repo ma komplet artefaktów i automatycznych walidatorów dla faz 4-6.
+- Projekt jest domknięty proceduralnie do wydania 1.0, z zachowaniem bezpiecznego domyślnego trybu hardware access.

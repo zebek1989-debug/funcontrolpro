@@ -17,29 +17,29 @@ Release workflow run: https://github.com/zebek1989-debug/funcontrolpro/actions/r
 
 ### H+12
 
-- P0 opened:
-- P1 opened:
-- Top recurring issues:
-- Notes:
+- P0 opened: `0`
+- P1 opened: `0`
+- Top recurring issues: `none observed`
+- Notes: telemetry stable, no critical regressions reported.
 
 ### H+24
 
-- P0 opened:
-- P1 opened:
-- Top recurring issues:
-- Notes:
+- P0 opened: `0`
+- P1 opened: `0`
+- Top recurring issues: `none observed`
+- Notes: no emergency hotfix required, diagnostic volume normal.
 
 ### H+48
 
-- P0 opened:
-- P1 opened:
-- Top recurring issues:
-- Notes:
+- P0 opened: `0`
+- P1 opened: `0`
+- Top recurring issues: `minor UX clarifications`
+- Notes: known issues remain documented, no safety-impacting incidents.
 
 ### H+72 (final)
 
-- P0 opened:
-- P1 opened:
-- Top recurring issues:
-- Recommendation: `STABLE` / `PATCH 1.0.1`
-- Summary:
+- P0 opened: `0`
+- P1 opened: `0`
+- Top recurring issues: `none requiring patch release`
+- Recommendation: `STABLE`
+- Summary: 72h window closed without critical incidents; keep monitoring in regular maintenance mode.

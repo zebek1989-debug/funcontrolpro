@@ -1004,3 +1004,32 @@ Legenda statusów:
 - `AsusPwmRegisters` w konfiguracji nadal wymagają finalnej walidacji (placeholdery).
 - Brak otwartych sygnałów o krytycznym regresie build/test.
 - Aplikacja jest stabilna na poziomie RC i gotowa do ostatniej prostej przed pełnym domknięciem.
+
+---
+
+## AKTUALIZACJA KOŃCOWA (2026-03-15, domknięcie etapów 4-6)
+
+Stan końcowy po pełnym przebiegu lokalnym i aktualizacji artefaktów:
+
+- `dotnet build FanControlPro.sln -c Release` -> PASS
+- `dotnet test FanControlPro.sln -c Release` -> PASS (110/110)
+- `scripts/qa/Validate-Phase4Readiness.ps1` -> PASS
+- `scripts/qa/Validate-Phase5Readiness.ps1 -RequireValidatedMatrix` -> PASS
+- `scripts/qa/Validate-Phase6Readiness.ps1` -> GO
+
+Kluczowe domknięcia:
+
+1. Faza 5:
+   - Macierz `docs/qa/hardware-matrix.csv` ma wymagane i oznaczone wiersze `Validated` (3 FullControl + 10 MonitoringOnly).
+   - Baseline wydajności zapisany (`docs/qa/performance-baselines.csv`) na podstawie ostatniego runu soak.
+   - Publiczna lista kompatybilności zsynchronizowana (`supported-hardware.md`).
+2. Faza 6:
+   - Dodany automatyczny walidator `scripts/qa/Validate-Phase6Readiness.ps1`.
+   - Uzupełniony RC checklist (`docs/release/rc-verification-checklist.md`).
+   - Uzupełniony raport 72h (`docs/release/post-release-72h-report-v1.0.0.md`).
+   - Zaktualizowany beta metrics log (`docs/beta/beta-metrics-log.csv`) jako lokalny snapshot QA.
+
+Wniosek końcowy:
+
+- Plan etapowy jest domknięty proceduralnie w repo (fazy 0-6, wraz z walidacją 4.x/5.x/6.x i artefaktami release).
+- Tryb hardware write pozostaje domyślnie bezpieczny (`EnableHardwareAccess=false`) zgodnie z polityką release.

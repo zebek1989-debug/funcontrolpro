@@ -34,7 +34,7 @@ pwsh -NoProfile -File scripts/compatibility/Validate-HardwareMatrix.ps1 -Require
 ```powershell
 pwsh -NoProfile -File scripts/performance/Run-Phase52Soak.ps1 `
   -ProjectPath src/FanControlPro.Presentation/FanControlPro.Presentation.csproj `
-  -DurationHours 24 `
+  -DurationMinutes 24 `
   -SampleIntervalSeconds 30 `
   -OutputDirectory artifacts/perf
 ```
@@ -66,4 +66,16 @@ Strict matrix gate:
 
 ```powershell
 pwsh -NoProfile -File scripts/qa/Validate-Phase5Readiness.ps1 -RequireValidatedMatrix
+```
+
+## Phase 6 Readiness Script
+
+```powershell
+pwsh -NoProfile -File scripts/qa/Validate-Phase6Readiness.ps1
+```
+
+Strict gate (fail command on NO-GO):
+
+```powershell
+pwsh -NoProfile -File scripts/qa/Validate-Phase6Readiness.ps1 -FailOnGate
 ```
