@@ -50,7 +50,10 @@ public sealed class BackupRecoveryFlowTests
 
             var result = await env.RestoreManager.RestoreLastKnownGoodAsync();
 
-            Assert.True(result.Success);
+            Assert.True(
+                result.Success,
+                $"Restore failed. Message='{result.Message}', RestoredFromBackup={result.RestoredFromBackup}, " +
+                $"FallbackToSafeDefaults={result.FallbackToSafeDefaults}, BackupPath='{result.RestoredBackupPath}', Duration={result.Duration.TotalMilliseconds:F0}ms");
             Assert.True(result.RestoredFromBackup);
             Assert.False(result.FallbackToSafeDefaults);
             Assert.True(result.Duration < TimeSpan.FromSeconds(3), $"Restore took {result.Duration.TotalMilliseconds:F0} ms.");
@@ -78,7 +81,9 @@ public sealed class BackupRecoveryFlowTests
             var startupResult = await env.StartupRecoveryService.EnsureHealthyStartupAsync();
 
             Assert.False(startupResult.HealthyBeforeRecovery);
-            Assert.True(startupResult.Recovered);
+            Assert.True(
+                startupResult.Recovered,
+                $"Startup recovery failed. Message='{startupResult.Message}', FallbackToSafeDefaults={startupResult.FallbackToSafeDefaults}");
 
             var finalValidation = await env.Validator.ValidateCurrentConfigurationAsync();
             Assert.True(finalValidation.IsValid);
