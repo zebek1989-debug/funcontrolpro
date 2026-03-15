@@ -1,0 +1,17 @@
+<Project Sdk="WixToolset.Sdk/4.0.6">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <Platform>x64</Platform>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <ProductVersion Condition="'$(ProductVersion)' == ''">1.0.0</ProductVersion>
+    <Manufacturer Condition="'$(Manufacturer)' == ''">FanControl Pro Contributors</Manufacturer>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(MSBuildThisFileDirectory)..\..\artifacts\publish\win-x64\</PublishDir>
+    <OutputName>FanControlPro-$(ProductVersion)-win-x64-setup</OutputName>
+    <DefineConstants>
+      PublishDir=$(PublishDir);
+      ProductVersion=$(ProductVersion);
+      Manufacturer=$(Manufacturer);
+      AppExeName=FanControlPro.Presentation.exe
+    </DefineConstants>
+  </PropertyGroup>
+</Project>

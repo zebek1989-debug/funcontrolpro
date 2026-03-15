@@ -1,0 +1,148 @@
+name: Release Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 1.0.0 or 1.0.0-rc1)"
+        required: false
+        default: "0.1.0-dev"
+      baseline_version:
+        description: "Baseline version used as the upgrade source MSI"
+        required: false
+        default: "0.0.1"
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Resolve Version
+        id: version
+        shell: pwsh
+        run: |
+          $inputVersion = "${{ github.event.inputs.version }}"
+          $tagVersion = "${{ github.ref_name }}"
+          $refType = "${{ github.ref_type }}"
+
+          if ([string]::IsNullOrWhiteSpace($inputVersion) -or $inputVersion -eq "0.1.0-dev") {
+            if ($refType -eq "tag" -and -not [string]::IsNullOrWhiteSpace($tagVersion)) {
+              $resolved = $tagVersion
+            }
+            else {
+              $resolved = "0.1.0-dev"
+            }
+          }
+          else {
+            $resolved = $inputVersion
+          }
+
+          if ($resolved.StartsWith("v")) {
+            $resolved = $resolved.Substring(1)
+          }
+
+          "version=$resolved" >> $env:GITHUB_OUTPUT
+          Write-Host "Resolved version: $resolved"
+
+      - name: Resolve Baseline Version
+        id: baseline
+        shell: pwsh
+        run: |
+          $inputBaseline = "${{ github.event.inputs.baseline_version }}"
+          if ([string]::IsNullOrWhiteSpace($inputBaseline)) {
+            $inputBaseline = "0.0.1"
+          }
+
+          if ($inputBaseline.StartsWith("v")) {
+            $inputBaseline = $inputBaseline.Substring(1)
+          }
+
+          "version=$inputBaseline" >> $env:GITHUB_OUTPUT
+          Write-Host "Resolved baseline version: $inputBaseline"
+
+      - name: Restore
+        run: dotnet restore FanControlPro.sln
+
+      - name: Build
+        run: dotnet build FanControlPro.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test FanControlPro.sln --configuration Release --no-build --verbosity normal
+
+      - name: Build Baseline MSI Artifacts
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File scripts/release/Build-ReleaseArtifacts.ps1 `
+            -Version "${{ steps.baseline.outputs.version }}" `
+            -Configuration Release `
+            -Runtime win-x64 `
+            -OutputRoot artifacts/release-baseline
+
+      - name: Build Release Artifacts
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File scripts/release/Build-ReleaseArtifacts.ps1 `
+            -Version "${{ steps.version.outputs.version }}" `
+            -Configuration Release `
+            -Runtime win-x64 `
+            -OutputRoot artifacts/release
+
+      - name: Resolve MSI Paths
+        id: msi
+        shell: pwsh
+        run: |
+          $baselineMsi = Get-ChildItem -Path artifacts/release-baseline -Filter *.msi -File -Recurse |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+          if ($null -eq $baselineMsi) {
+            throw "No baseline MSI artifact found in artifacts/release-baseline."
+          }
+
+          $targetMsi = Get-ChildItem -Path artifacts/release -Filter *.msi -File -Recurse |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+          if ($null -eq $targetMsi) {
+            throw "No target MSI artifact found in artifacts/release."
+          }
+
+          "baseline=$($baselineMsi.FullName)" >> $env:GITHUB_OUTPUT
+          "target=$($targetMsi.FullName)" >> $env:GITHUB_OUTPUT
+          Write-Host "Baseline MSI: $($baselineMsi.FullName)"
+          Write-Host "Target MSI: $($targetMsi.FullName)"
+
+      - name: Validate MSI Lifecycle
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File scripts/release/Validate-MsiLifecycle.ps1 `
+            -MsiPath "${{ steps.msi.outputs.target }}" `
+            -ExpectedDisplayName "FanControl Pro" `
+            -ExecutableName "FanControlPro.Presentation.exe"
+
+      - name: Validate MSI Upgrade
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File scripts/release/Validate-MsiUpgrade.ps1 `
+            -OldMsiPath "${{ steps.msi.outputs.baseline }}" `
+            -NewMsiPath "${{ steps.msi.outputs.target }}" `
+            -ExpectedDisplayName "FanControl Pro" `
+            -ExecutableName "FanControlPro.Presentation.exe"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fancontrolpro-release-${{ steps.version.outputs.version }}
+          path: |
+            artifacts/release/**
+            artifacts/release-baseline/**
+          if-no-files-found: error

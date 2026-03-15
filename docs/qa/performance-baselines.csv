@@ -1,0 +1,2 @@
+RunId,DateUtc,ConfigurationId,BuildVersion,DurationHours,AvgCpuPercent,PeakCpuPercent,AvgRamMb,PeakRamMb,StartupTimeMs,CriticalErrorLines,FailsafeEvents,Result,Notes
+SOAK-PLACEHOLDER-001,2026-03-15T00:00:00Z,FC-001,TBD,24,,,,,,,Planned,Fill after first full soak run
