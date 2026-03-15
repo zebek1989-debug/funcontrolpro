@@ -145,6 +145,12 @@ $matrixScriptPath = Join-Path $repoRoot "scripts/compatibility/Validate-Hardware
 $matrixFullPath = Join-Path $repoRoot $MatrixPath
 $performanceBaselinesFullPath = Join-Path $repoRoot $PerformanceBaselinesPath
 $testsProjectFullPath = Join-Path $repoRoot $TestsProjectPath
+$testsProjectDotNetPath = if ($null -ne $wslContext) {
+    $TestsProjectPath -replace "\\", "/"
+}
+else {
+    $testsProjectFullPath
+}
 $reportFullPath = Join-Path $repoRoot $ReportPath
 
 Push-Location $repoRoot
@@ -180,7 +186,7 @@ try {
     $integrationParams = @{
         Arguments = @(
             "test",
-            $testsProjectFullPath,
+            $testsProjectDotNetPath,
             "--verbosity",
             "minimal",
             "--no-build",
@@ -196,7 +202,7 @@ try {
     $stressParams = @{
         Arguments = @(
             "test",
-            $testsProjectFullPath,
+            $testsProjectDotNetPath,
             "--verbosity",
             "minimal",
             "--no-build",
