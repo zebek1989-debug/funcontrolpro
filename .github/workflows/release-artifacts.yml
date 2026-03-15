@@ -123,13 +123,13 @@ jobs:
               }
 
               if ([string]::IsNullOrWhiteSpace($message)) {
-                Write-Host "::error title=Test $outcome::$name"
+                Write-Host "::error title=Test ${outcome}::${name}"
               }
               else {
-                Write-Host "::error title=Test $outcome::$name - $message"
+                Write-Host "::error title=Test ${outcome}::${name} - $message"
               }
 
-              $failedTests.Add("$outcome: $name")
+              $failedTests.Add("${outcome}: ${name}")
             }
           }
 
