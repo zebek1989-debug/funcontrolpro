@@ -98,6 +98,8 @@ try {
             $ProjectPath,
             "--verbosity",
             "minimal",
+            "--no-build",
+            "--no-restore",
             "--filter",
             "FullyQualifiedName~FanControlPro.Tests.Presentation."
         ) `
@@ -110,6 +112,8 @@ try {
             $ProjectPath,
             "--verbosity",
             "minimal",
+            "--no-build",
+            "--no-restore",
             "--filter",
             "FullyQualifiedName~TaskSchedulerAutostartServiceTests"
         ) `
@@ -122,6 +126,8 @@ try {
             $ProjectPath,
             "--verbosity",
             "minimal",
+            "--no-build",
+            "--no-restore",
             "--filter",
             "FullyQualifiedName~JsonApplicationSettingsServiceTests"
         ) `
