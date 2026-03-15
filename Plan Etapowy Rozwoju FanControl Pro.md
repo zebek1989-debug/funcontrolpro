@@ -921,82 +921,86 @@
 
 ---
 
-## AUDYT ZGODNOŚCI Z PLANEM (stan na 2026-03-15)
+## AUDYT ZGODNOŚCI Z PLANEM (stan na 2026-03-15, po commit `f6d3097`)
 
 Legenda statusów:
-- `DONE` = wdrożone i potwierdzone build/testami lokalnie.
-- `PARTIAL` = wdrożone częściowo lub bez pełnej walidacji z kryteriów planu.
+- `DONE` = wdrożone i potwierdzone lokalnym build/test lub działaniem runtime.
+- `PARTIAL` = wdrożone, ale bez pełnej walidacji sprzętowej/E2E z kryteriów planu.
 - `MISSING` = brak implementacji.
+
+### Snapshot jakości
+
+- `dotnet build` -> PASS (0 błędów, 0 ostrzeżeń)
+- `dotnet test` -> PASS (**87/87**)
+- UI uruchamia się i działa (onboarding + dashboard, poprawiony theme/kontrast/scroll)
+- status projektu: **RC (~90-92%)**, gotowy do finalnego domknięcia hardware validation
 
 ### Faza 0
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 0.1 Środowisko deweloperskie | DONE | Projekt buduje się lokalnie, repo istnieje i dodano workflow CI (`.github/workflows/ci.yml`). |
-| 0.2 Architektura projektu | DONE | Projekty, DI i logging do pliku są zaimplementowane i działają. |
+| 0.1 Środowisko deweloperskie | DONE | Repo i workflow CI działają, projekt buduje się lokalnie. |
+| 0.2 Architektura projektu | DONE | Clean Architecture, DI i logging są wdrożone i używane. |
 
 ### Faza 1
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 1.1 Wykrywanie sprzętu | PARTIAL | `HardwareDetector` + cache istnieją; brak potwierdzenia manualnej walidacji na realnym sprzęcie i cross-checku z HWiNFO. |
-| 1.2 Odczyt sensorów | PARTIAL | Monitoring loop + sanity checks są wdrożone; brak formalnych testów 24h i pomiarów budżetu CPU <2%. |
-| 1.3 Dashboard | PARTIAL | Dashboard i binding działają; brak potwierdzonych testów responsywności na macierzy rozdzielczości. |
+| 1.1 Wykrywanie sprzętu | PARTIAL | Detekcja + klasyfikacja + cache działają; brak pełnego, udokumentowanego cross-checku z HWiNFO na macierzy docelowej. |
+| 1.2 Odczyt sensorów | PARTIAL | Monitoring loop i sanity checks są; brak formalnych runów 24h i finalnych metryk wydajnościowych. |
+| 1.3 Dashboard | PARTIAL | Dashboard działa stabilnie; nadal brak formalnych testów UI dla różnych rozdzielczości/scenariuszy E2E. |
 
 ### Faza 2
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 2.1 Architektura kontroli | DONE | `IFanControllerV2`, factory, onboarding/consent i fallback monitoring-only działają. |
-| 2.2 Manualna kontrola PWM | PARTIAL | Manual control + grupy + ograniczenia są; brak potwierdzonej walidacji hardware-in-the-loop (ASUS Z490-P, response <1s na realnym RPM). |
-| 2.3 Krzywe wentylatorów | PARTIAL | Curve engine, walidacja, preview i test mode są; brak formalnego benchmarku `<1ms` i części testów wydajnościowych z planu. |
-| 2.4 Profile | DONE | Profile service + persistence + UI selector działają, z testami przełączania i odtwarzania po restarcie. |
+| 2.1 Architektura kontroli | DONE | `IFanControllerV2`, factory, consent flow i fallback monitoring-only działają. |
+| 2.2 Manualna kontrola PWM | PARTIAL | Implementacja `WinRing0EcRegisterAccess` + `LibreHardwareMonitorSuperIoFanControlAccess` istnieje, ale produkcyjnie write-path jest nadal gated konfiguracją (`EnableHardwareAccess=false`). |
+| 2.3 Krzywe wentylatorów | PARTIAL | Curve engine/editor/preview są; brak formalnego benchmarku i pełnej walidacji hardware-in-the-loop. |
+| 2.4 Profile | DONE | Profile service, persistence i aktywacja profili działają i są przetestowane. |
 
 ### Faza 3
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 3.1 Safety Monitor | PARTIAL | `SafetyMonitorServiceV2`, watchdog i failsafe są; brak toast notifications i tray icon animation. |
-| 3.2 Backup & Recovery | DONE | `BackupServiceV2`, `RestoreManager`, startup recovery, checksums, retencja i testy korupcji/restore są wdrożone. |
-| 3.3 Logi diagnostyczne | PARTIAL | Dodano export support bundle i panel diagnostyczny (timeline + eksport), ale brakuje pełnego timeline incydentów i redakcji danych wrażliwych. |
+| 3.1 Safety Monitor | PARTIAL | Watchdog/failsafe/alerting są, ale brak pełnej walidacji operacyjnej na docelowym sprzęcie i pełnego zestawu UX testów alarmów. |
+| 3.2 Backup & Recovery | DONE | Backup/restore/checksum/startup recovery działają i są pokryte testami. |
+| 3.3 Logi diagnostyczne | PARTIAL | Logi + support bundle + diagnostyka są; do domknięcia pełne E2E scenariusze incydentowe i finalna polityka redakcji danych. |
 
 ### Faza 4
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 4.1 System Tray i autostart | PARTIAL | `ITrayService` + menu tray (Show/Hide, profile switch, Full Speed, Exit), zamykanie do tray, `TaskSchedulerAutostartService` (`schtasks`, minimized + delay) oraz deduplikowane powiadomienia dla alertów temperatury/failsafe/konfliktu vendor tool. Pozostaje walidacja E2E autostartu po logowaniu na docelowym Windows. |
-| 4.2 Onboarding i klasyfikacja sprzętu | PARTIAL | Dodano first-run wizard (welcome + tryby + wymaganie admin), ekran klasyfikacji z badge i linkiem kompatybilności, consent flow z możliwością cofnięcia zgody oraz empty states (brak wspieranego kontrolera / brak admin / konflikt vendor). Brakuje formalnej walidacji UX i scenariuszy hardware-in-the-loop. |
-| 4.3 Ustawienia aplikacji | PARTIAL | Dodano panel Settings (polling/threshold/theme/autostart/startup/default profile), persistence `settings.json5` z walidacją i resetem do defaults, live apply (theme/polling/tray behavior) oraz testy `JsonApplicationSettingsService`. Pozostaje walidacja UX na docelowych scenariuszach użytkownika i E2E restart app. |
+| 4.1 System Tray i autostart | PARTIAL | Tray/autostart są wdrożone; wymaga finalnej walidacji E2E autostartu po logowaniu na docelowym Windows. |
+| 4.2 Onboarding i klasyfikacja sprzętu | PARTIAL | Wizard/consent/empty-states działają; wymaga końcowej walidacji UX i flow hardware-in-the-loop. |
+| 4.3 Ustawienia aplikacji | PARTIAL | Settings UI + persistence + live apply działają; do domknięcia testy E2E restartu i scenariusze użytkowe. |
 
 ### Faza 5
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 5.1 Macierz kompatybilności | PARTIAL | Dodano publiczna liste `supported-hardware.md`, procedure walidacji (`docs/qa/hardware-validation-checklist.md`), matryce konfliktow vendor (`docs/qa/vendor-conflict-test-matrix.md`), szablon raportu i machine-readable matrix (`docs/qa/hardware-matrix.csv`) ze skryptem walidacji (`scripts/compatibility/Validate-HardwareMatrix.ps1`). Brakuje wynikow hardware-in-the-loop oznaczonych jako `Validated`. |
-| 5.2 Performance i soak testing | PARTIAL | Dodano playbook (`docs/qa/performance-soak-playbook.md`), baseline registry (`docs/qa/performance-baselines.csv`), szablon raportu (`docs/qa/performance-run-template.md`), skrypt soak 24h (`scripts/performance/Run-Phase52Soak.ps1`) oraz automatyczny test stresowy przelaczania profili (`ProfileSwitchStressTests`). Brakuje rzeczywistych runow 24h i wypelnionych metryk z docelowego Windows/hardware. |
-| 5.3 Instalator i dystrybucja | DONE | Dodano scaffold WiX v4 (`installer/wix`), generator manifestu plikow do MSI, skrypt budowania artefaktow release (`scripts/release/Build-ReleaseArtifacts.ps1`), automatyczna walidacje lifecycle MSI (`scripts/release/Validate-MsiLifecycle.ps1`) i upgrade MSI (`scripts/release/Validate-MsiUpgrade.ps1`) oraz workflow GitHub Actions dla artefaktow Windows (`.github/workflows/release-artifacts.yml`) budujacy baseline + target MSI i wykonujacy oba testy. Uzupelniono checkliste pakowania, draft release notes, MIT `LICENSE` i `THIRD-PARTY-NOTICES.md`. Potwierdzono pierwszy kompletny zielony run release na Windows: Actions `Release Artifacts`, run #6 (tag `v0.1.6`, 2026-03-15). |
+| 5.1 Macierz kompatybilności | PARTIAL | Checklisty i artefakty QA są; brak kompletu potwierdzonych runów `Validated` na docelowej macierzy hardware. |
+| 5.2 Performance i soak testing | PARTIAL | Playbooki/skrypty/baselines są; brak finalnych runów 24h z kompletnym raportem metryk. |
+| 5.3 Instalator i dystrybucja | DONE | WiX + pipeline release artifacts + walidacja lifecycle/upgrade MSI są wdrożone. |
 
 ### Faza 6
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 6.1 Zamknięta beta | PARTIAL | Dodano pakiet operacyjny bety: plan rekrutacji i roster testerow (`docs/beta/tester-recruitment-plan.md`, `docs/beta/tester-roster.csv`), workflow feedback + triage P0/P1/P2 (`docs/beta/beta-feedback-triage.md`), szablon issue z wymaganym support bundle (`.github/ISSUE_TEMPLATE/beta-bug-report.yml`) oraz metryki i review template (`docs/beta/beta-metrics-log.csv`, `docs/beta/beta-metrics-review-template.md`) wraz ze skryptem gate-check (`scripts/beta/Calculate-BetaReadiness.ps1`). Brakuje wykonania rzeczywistej rundy zamknietej bety i uzupelnienia metryk danymi produkcyjnymi. |
-| 6.2 Release Candidate | PARTIAL | Dodano policy feature freeze (`docs/release/feature-freeze-policy.md`), checklistę RC (`docs/release/rc-verification-checklist.md`), dokumentację wydania (`docs/release/KNOWN_ISSUES.md`, `docs/release/user-guide.md`), oraz `CHANGELOG.md` z wpisem RC. Dodano też skrypt tagowania RC w SemVer (`scripts/release/New-RcTag.ps1`). Brakuje wykonania pełnej ręcznej checklisty RC i formalnej decyzji Go/No-Go. |
-| 6.3 Wydanie 1.0 | DONE | Dodano pakiet wydania publicznego: runbook publikacji (`docs/release/public-release-runbook.md`), Getting Started (`docs/release/getting-started.md`), plan hotfixow (`docs/release/hotfix-response-plan.md`), monitoring 72h (`docs/release/post-release-72h-monitoring.md`) i template incydentu hotfix (`.github/ISSUE_TEMPLATE/hotfix-incident.yml`). Workflow release tworzy GitHub Release dla stabilnych tagow (`.github/workflows/release-artifacts.yml`). Potwierdzono publikacje `v1.0.0` (GitHub Release + MSI/ZIP/SHA256, run #8 z sukcesem, 2026-03-15) oraz uruchomiono raport monitoringu 72h (`docs/release/post-release-72h-report-v1.0.0.md`). |
+| 6.1 Zamknięta beta | PARTIAL | Narzędzia i proces bety są; brak pełnego przebiegu z realnymi metrykami i triage zamykającym pętlę. |
+| 6.2 Release Candidate | PARTIAL | Checklisty/polityki/release docs są; brakuje formalnego final Go/No-Go po walidacji sprzętowej P1. |
+| 6.3 Wydanie 1.0 | DONE | Publiczny release + artefakty + dokumentacja istnieją; release jest konserwatywny (hardware write domyślnie wyłączony). |
 
 ### Dodatkowe zadania: Integration Tests
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 4.2 Integration Tests (sekcja dodatkowa) | DONE | Testy integracyjne działają; obecny stan suite: 79 testów przechodzi lokalnie. |
+| 4.2 Integration Tests (sekcja dodatkowa) | DONE | Suite testowa działa; obecnie **87 testów** przechodzi lokalnie. |
 
 ### Podsumowanie audytu
 
-- Gotowe funkcjonalnie: kluczowy core faz 2.x oraz 3.2.
-- Częściowo gotowe: faza 1, 3.1, 3.3 i faza 4 (4.1-4.3).
-- Najwieksza luka: domkniecie operacyjne monitoringu 72h po wydaniu 1.0.0 i decyzja o ewentualnym patchu 1.0.1.
-- brak otwartych krytycznych bugów bezpieczeństwa,
-- działający failsafe i recovery,
-- opublikowana lista kompatybilności,
-- walidacja na sprzęcie Full Control i Monitoring Only: w toku (brak kompletu runow hardware-in-the-loop),
-- ścieżka instalacji, upgrade i uninstall: potwierdzona zielonym runem Windows end-to-end (`Release Artifacts` #6, tag `v0.1.6`, 2026-03-15).
+- Największa luka nie jest już „brak implementacji”, tylko **domknięcie walidacji produkcyjnej**.
+- Krytyczny blocker do pełnego production-ready: hardware-in-the-loop na ASUS Z490-P + finalna decyzja dla `EnableHardwareAccess`.
+- `AsusPwmRegisters` w konfiguracji nadal wymagają finalnej walidacji (placeholdery).
+- Brak otwartych sygnałów o krytycznym regresie build/test.
+- Aplikacja jest stabilna na poziomie RC i gotowa do ostatniej prostej przed pełnym domknięciem.
