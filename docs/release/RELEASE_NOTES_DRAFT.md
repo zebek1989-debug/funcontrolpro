@@ -1,6 +1,6 @@
 # FanControl Pro Release Notes (Draft)
 
-Version: 1.0.0-rc1 (draft)  
+Version: 1.0.0-rc1  
 Date: 2026-03-15
 
 ## Highlights
@@ -9,18 +9,20 @@ Date: 2026-03-15
 - Manual control, fan curves, and profile switching.
 - Safety monitor with failsafe and recovery workflows.
 - Tray integration, onboarding flow, and application settings.
+- Automated Windows release pipeline with MSI lifecycle + upgrade validation.
 
-## Phase 5 Updates (In Progress)
+## RC Readiness Updates
 
-- Public compatibility matrix and QA validation assets added.
-- Performance/soak playbook and stress test harness added.
-- MSI installer scaffold (WiX v4) and release artifact workflow added.
+- Feature freeze policy documented.
+- RC verification checklist prepared.
+- Known issues and user guide drafted.
+- CHANGELOG initialized for RC series.
 
 ## Known Limitations
 
 - Full compatibility matrix still requires hardware-in-the-loop validation.
 - 24h soak results are pending on target Windows hardware.
-- Installer flow requires Windows build runner for MSI generation.
+- Some OEM platforms remain monitoring-only due to missing safe write path.
 
 ## Upgrade Notes
 
@@ -30,3 +32,4 @@ Date: 2026-03-15
 ## Support
 
 - Include support bundle when reporting issues.
+- Beta/RC issue template requires bundle attachment by default.

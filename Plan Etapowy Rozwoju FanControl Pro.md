@@ -981,7 +981,7 @@ Legenda statusów:
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
 | 6.1 Zamknięta beta | PARTIAL | Dodano pakiet operacyjny bety: plan rekrutacji i roster testerow (`docs/beta/tester-recruitment-plan.md`, `docs/beta/tester-roster.csv`), workflow feedback + triage P0/P1/P2 (`docs/beta/beta-feedback-triage.md`), szablon issue z wymaganym support bundle (`.github/ISSUE_TEMPLATE/beta-bug-report.yml`) oraz metryki i review template (`docs/beta/beta-metrics-log.csv`, `docs/beta/beta-metrics-review-template.md`) wraz ze skryptem gate-check (`scripts/beta/Calculate-BetaReadiness.ps1`). Brakuje wykonania rzeczywistej rundy zamknietej bety i uzupelnienia metryk danymi produkcyjnymi. |
-| 6.2 Release Candidate | MISSING | Brak checklisty RC, changelogu i tagowania RC. |
+| 6.2 Release Candidate | PARTIAL | Dodano policy feature freeze (`docs/release/feature-freeze-policy.md`), checklistę RC (`docs/release/rc-verification-checklist.md`), dokumentację wydania (`docs/release/KNOWN_ISSUES.md`, `docs/release/user-guide.md`), oraz `CHANGELOG.md` z wpisem RC. Dodano też skrypt tagowania RC w SemVer (`scripts/release/New-RcTag.ps1`). Brakuje wykonania pełnej ręcznej checklisty RC i formalnej decyzji Go/No-Go. |
 | 6.3 Wydanie 1.0 | MISSING | Brak publicznych artefaktów wydania i procedur post-release. |
 
 ### Dodatkowe zadania: Integration Tests
