@@ -87,13 +87,14 @@ try {
         Write-Host "Detected WSL UNC path. dotnet commands will run via wsl.exe in distro '$($wslContext.Distro)'."
     }
 
-    Invoke-DotNetOrThrow @{
+    $buildParams = @{
         Arguments = @("build", "--verbosity", "minimal")
         StepName = "dotnet build"
         WslContext = $wslContext
     }
+    Invoke-DotNetOrThrow @buildParams
 
-    Invoke-DotNetOrThrow @{
+    $presentationTestParams = @{
         Arguments = @(
             "test",
             $ProjectPath,
@@ -107,8 +108,9 @@ try {
         StepName = "dotnet test (phase 4 presentation scope)"
         WslContext = $wslContext
     }
+    Invoke-DotNetOrThrow @presentationTestParams
 
-    Invoke-DotNetOrThrow @{
+    $autostartTestParams = @{
         Arguments = @(
             "test",
             $ProjectPath,
@@ -122,8 +124,9 @@ try {
         StepName = "dotnet test (phase 4 autostart scope)"
         WslContext = $wslContext
     }
+    Invoke-DotNetOrThrow @autostartTestParams
 
-    Invoke-DotNetOrThrow @{
+    $settingsTestParams = @{
         Arguments = @(
             "test",
             $ProjectPath,
@@ -137,6 +140,7 @@ try {
         StepName = "dotnet test (phase 4 settings scope)"
         WslContext = $wslContext
     }
+    Invoke-DotNetOrThrow @settingsTestParams
 
     $settingsPath = Join-Path $repoRoot "src/FanControlPro.Presentation/appsettings.json"
     $hardwareAccessDefault = Resolve-HardwareAccessDefault -SettingsPath $settingsPath
