@@ -116,7 +116,7 @@ public sealed class RestoreManager : IRestoreManager
                 Success: false,
                 RestoredFromBackup: false,
                 FallbackToSafeDefaults: false,
-                Message: "Restore flow failed due to unexpected error.",
+                Message: $"Restore flow failed due to unexpected error: {ex.Message}",
                 RestoredBackupPath: null,
                 Duration: stopwatch.Elapsed);
         }
