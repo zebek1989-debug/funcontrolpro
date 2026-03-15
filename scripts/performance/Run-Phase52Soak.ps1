@@ -9,6 +9,74 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Resolve-WslContext {
+    param([string]$WindowsPath)
+
+    if ($WindowsPath -match "^\\\\wsl(?:\.localhost)?\\([^\\]+)\\(.+)$") {
+        $distro = $Matches[1]
+        $linuxSuffix = $Matches[2] -replace "\\", "/"
+        $linuxPath = "/$linuxSuffix"
+
+        return [pscustomobject]@{
+            Distro = $distro
+            LinuxPath = $linuxPath
+        }
+    }
+
+    return $null
+}
+
+function Convert-WindowsWslPathToLinuxPath {
+    param([string]$WindowsPath)
+
+    if ($WindowsPath -match "^\\\\wsl(?:\.localhost)?\\[^\\]+\\(.+)$") {
+        $linuxSuffix = $Matches[1] -replace "\\", "/"
+        return "/$linuxSuffix"
+    }
+
+    return $null
+}
+
+function Invoke-NativeOrThrow {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FilePath,
+        [Parameter(Mandatory = $true)]
+        [string[]]$Arguments,
+        [Parameter(Mandatory = $true)]
+        [string]$StepName
+    )
+
+    & $FilePath @Arguments
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        throw "$StepName failed with exit code $exitCode."
+    }
+}
+
+function Prepare-LocalRunDirectory {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$SourceDirectory,
+        [Parameter(Mandatory = $true)]
+        [string]$RunId
+    )
+
+    if (-not (Test-Path -LiteralPath $SourceDirectory)) {
+        throw "Source output directory not found: $SourceDirectory"
+    }
+
+    $targetDirectory = Join-Path -Path $env:TEMP -ChildPath ("FanControlPro\soak\" + $RunId + "\net8.0")
+    if (Test-Path -LiteralPath $targetDirectory) {
+        Remove-Item -LiteralPath $targetDirectory -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    New-Item -ItemType Directory -Path $targetDirectory -Force | Out-Null
+    Copy-Item -Path (Join-Path $SourceDirectory "*") -Destination $targetDirectory -Recurse -Force
+
+    return $targetDirectory
+}
+
 if ($DurationHours -lt 1) {
     throw "DurationHours must be >= 1."
 }
@@ -17,9 +85,19 @@ if ($SampleIntervalSeconds -lt 5) {
     throw "SampleIntervalSeconds must be >= 5."
 }
 
-$projectFullPath = Resolve-Path -LiteralPath $ProjectPath
+$repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).ProviderPath
+$projectFullPath = (Resolve-Path -LiteralPath $ProjectPath).ProviderPath
+$wslContext = Resolve-WslContext -WindowsPath $repoRoot
+
+$outputRoot = if ([System.IO.Path]::IsPathRooted($OutputDirectory)) {
+    $OutputDirectory
+}
+else {
+    Join-Path $repoRoot $OutputDirectory
+}
+
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$runDirectory = Join-Path $OutputDirectory $timestamp
+$runDirectory = Join-Path $outputRoot $timestamp
 New-Item -ItemType Directory -Path $runDirectory -Force | Out-Null
 
 $samplesPath = Join-Path $runDirectory "process-samples.csv"
@@ -27,18 +105,52 @@ $summaryJsonPath = Join-Path $runDirectory "summary.json"
 $summaryTextPath = Join-Path $runDirectory "summary.txt"
 
 Write-Host "Building project..."
-dotnet build "$projectFullPath" -c Release | Out-Host
+$projectDirectory = Split-Path -Path $projectFullPath -Parent
+$projectLinuxPath = Convert-WindowsWslPathToLinuxPath -WindowsPath $projectFullPath
 
-Write-Host "Starting FanControl Pro soak run..."
-$arguments = @(
-    "run",
-    "--no-build",
-    "--project", "$projectFullPath",
-    "--",
-    "--start-minimized"
-)
+if ($null -ne $wslContext -and -not [string]::IsNullOrWhiteSpace($projectLinuxPath)) {
+    Write-Host "Detected WSL UNC path. Building via wsl.exe in distro '$($wslContext.Distro)'."
+    Invoke-NativeOrThrow `
+        -FilePath "wsl.exe" `
+        -Arguments @(
+            "-d",
+            $wslContext.Distro,
+            "--cd",
+            $wslContext.LinuxPath,
+            "--exec",
+            "dotnet",
+            "build",
+            $projectLinuxPath,
+            "-c",
+            "Release"
+        ) `
+        -StepName "dotnet build (wsl)"
+}
+else {
+    Invoke-NativeOrThrow `
+        -FilePath "dotnet" `
+        -Arguments @(
+            "build",
+            $projectFullPath,
+            "-c",
+            "Release"
+        ) `
+        -StepName "dotnet build"
+}
 
-$process = Start-Process -FilePath "dotnet" -ArgumentList $arguments -PassThru
+$sourceOutputDirectory = Join-Path -Path $projectDirectory -ChildPath "bin\Release\net8.0"
+$localRunDirectory = Prepare-LocalRunDirectory -SourceDirectory $sourceOutputDirectory -RunId $timestamp
+$exePath = Join-Path -Path $localRunDirectory -ChildPath "FanControlPro.Presentation.exe"
+if (-not (Test-Path -LiteralPath $exePath)) {
+    throw "Executable not found in staged local directory: $exePath"
+}
+
+Write-Host "Starting FanControl Pro soak run (local stage)..."
+$process = Start-Process `
+    -FilePath $exePath `
+    -ArgumentList @("--start-minimized") `
+    -WorkingDirectory (Split-Path -Path $exePath -Parent) `
+    -PassThru
 
 $samples = New-Object System.Collections.Generic.List[object]
 $startUtc = [DateTimeOffset]::UtcNow
@@ -110,6 +222,7 @@ if (Test-Path -LiteralPath $logsRoot) {
 $summary = [pscustomobject]@{
     RunTimestampUtc = $startUtc.ToString("o")
     ProjectPath = "$projectFullPath"
+    ExecutablePath = "$exePath"
     DurationHours = $DurationHours
     SampleIntervalSeconds = $SampleIntervalSeconds
     SampleCount = $samples.Count
