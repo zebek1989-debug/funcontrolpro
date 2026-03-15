@@ -974,7 +974,7 @@ Legenda statusów:
 |-----------|--------|-----------|
 | 5.1 Macierz kompatybilności | PARTIAL | Dodano publiczna liste `supported-hardware.md`, procedure walidacji (`docs/qa/hardware-validation-checklist.md`), matryce konfliktow vendor (`docs/qa/vendor-conflict-test-matrix.md`), szablon raportu i machine-readable matrix (`docs/qa/hardware-matrix.csv`) ze skryptem walidacji (`scripts/compatibility/Validate-HardwareMatrix.ps1`). Brakuje wynikow hardware-in-the-loop oznaczonych jako `Validated`. |
 | 5.2 Performance i soak testing | PARTIAL | Dodano playbook (`docs/qa/performance-soak-playbook.md`), baseline registry (`docs/qa/performance-baselines.csv`), szablon raportu (`docs/qa/performance-run-template.md`), skrypt soak 24h (`scripts/performance/Run-Phase52Soak.ps1`) oraz automatyczny test stresowy przelaczania profili (`ProfileSwitchStressTests`). Brakuje rzeczywistych runow 24h i wypelnionych metryk z docelowego Windows/hardware. |
-| 5.3 Instalator i dystrybucja | PARTIAL | Dodano scaffold WiX v4 (`installer/wix`), generator manifestu plikow do MSI, skrypt budowania artefaktow release (`scripts/release/Build-ReleaseArtifacts.ps1`), automatyczna walidacje lifecycle MSI (`scripts/release/Validate-MsiLifecycle.ps1`) i upgrade MSI (`scripts/release/Validate-MsiUpgrade.ps1`) oraz workflow GitHub Actions dla artefaktow Windows (`.github/workflows/release-artifacts.yml`) budujacy baseline + target MSI i wykonujacy oba testy. Uzupelniono checkliste pakowania, draft release notes, MIT `LICENSE` i `THIRD-PARTY-NOTICES.md`. Brakuje pierwszego kompletnego zielonego release runu na pipeline Windows. |
+| 5.3 Instalator i dystrybucja | DONE | Dodano scaffold WiX v4 (`installer/wix`), generator manifestu plikow do MSI, skrypt budowania artefaktow release (`scripts/release/Build-ReleaseArtifacts.ps1`), automatyczna walidacje lifecycle MSI (`scripts/release/Validate-MsiLifecycle.ps1`) i upgrade MSI (`scripts/release/Validate-MsiUpgrade.ps1`) oraz workflow GitHub Actions dla artefaktow Windows (`.github/workflows/release-artifacts.yml`) budujacy baseline + target MSI i wykonujacy oba testy. Uzupelniono checkliste pakowania, draft release notes, MIT `LICENSE` i `THIRD-PARTY-NOTICES.md`. Potwierdzono pierwszy kompletny zielony run release na Windows: Actions `Release Artifacts`, run #6 (tag `v0.1.6`, 2026-03-15). |
 
 ### Faza 6
 
@@ -999,4 +999,4 @@ Legenda statusów:
 - działający failsafe i recovery,
 - opublikowana lista kompatybilności,
 - walidacja na sprzęcie Full Control i Monitoring Only: w toku (brak kompletu runow hardware-in-the-loop),
-- ścieżka instalacji, upgrade i uninstall: zautomatyzowana w CI, oczekuje pierwszego zielonego runu Windows end-to-end.
+- ścieżka instalacji, upgrade i uninstall: potwierdzona zielonym runem Windows end-to-end (`Release Artifacts` #6, tag `v0.1.6`, 2026-03-15).
