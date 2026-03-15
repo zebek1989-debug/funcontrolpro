@@ -7,7 +7,7 @@
 
 **Aktualna gotowość projektu:** około **90-92%** (release-candidate, nie pełna produkcja).  
 **Build:** PASS (0 błędów, 0 ostrzeżeń).  
-**Testy:** PASS (**87/87**).  
+**Testy:** PASS (**110/110**).  
 **Tag:** `v1.0.0` istnieje.  
 
 Projekt jest bardzo blisko produkcji, ale nie można jeszcze uczciwie uznać go za „w pełni domknięty v1.0 hardware-control” bez końcowej walidacji sprzętowej i domknięcia konfiguracji write-path.
@@ -29,6 +29,13 @@ Projekt jest bardzo blisko produkcji, ale nie można jeszcze uczciwie uznać go 
 - Działa onboarding i przejście do dashboardu.
 - Dodane poprawki uruchamiania pod WSL/Windows (skrypty run + lokalny staging exe + diagnostyka).
 - Naprawiony temat/kontrast i przewijanie głównego widoku.
+- Domknięte etapy 4.x na poziomie kodu/testów:
+  - startup policy (`--start-minimized`, `--force-visible`) pokryta testami,
+  - onboarding gating/conflict scenarios pokryte testami,
+  - settings save/validation/reset + poprawne mapowanie `Theme=System`.
+- Dodane artefakty walidacji 4.x:
+  - `docs/qa/phase4-ux-system-integration-checklist.md`
+  - `scripts/qa/Validate-Phase4Readiness.ps1`
 
 ### 2.3 Bezpieczeństwo i narzędzia wydaniowe
 - Działa safety/cooldown/read-back logika w backendzie.
@@ -50,7 +57,7 @@ W `AsusPwmRegisters` wartości są nadal `-1` (placeholder), więc ścieżka EC 
 Brakuje zamkniętego, udokumentowanego runu walidacji na docelowym sprzęcie (ASUS Z490-P + NCT6798D) z checklistą P1 i raportem końcowym PASS.
 
 ### 3.4 Brak pełnych testów UI/E2E warstwy Presentation
-Testy domeny/aplikacji/infrastruktury są mocne, ale nadal brakuje dedykowanego zestawu UI/E2E dla Presentation (workflow użytkownika end-to-end).
+Testy domeny/aplikacji/infrastruktury są mocne, coverage ViewModel Presentation został rozszerzony, ale nadal brakuje pełnej automatyzacji UI E2E (workflow okno/tray/interakcje użytkownika 1:1).
 
 ## 4) Aktualny, rzetelny wniosek
 
@@ -66,7 +73,7 @@ Jednocześnie:
 1. **P1:** Walidacja sprzętowa ASUS Z490-P checklistą QA i końcowy raport PASS.
 2. **P1:** Uzupełnienie finalnych map rejestrów EC (jeśli EC fallback ma być aktywnie używany).
 3. **P1:** Decyzja release: domyślnie `EnableHardwareAccess=false` (bezpiecznie) czy profil wdrożeniowy z `true` po walidacji.
-4. **P2:** Dodać testy UI/E2E dla kluczowych flow (onboarding, manual PWM, profile, settings).
+4. **P2:** Dodać pełne testy UI/E2E (okno + tray + interakcje) dla kluczowych flow.
 5. **P2:** Finalny commit/release clean-up i publikacja artefaktów po potwierdzeniu hardware run.
 
 ---
@@ -74,6 +81,6 @@ Jednocześnie:
 ## 6) Potwierdzenie wykonania w tym audycie
 
 - `dotnet build` -> PASS
-- `dotnet test` -> PASS (87/87)
+- `dotnet test` -> PASS (110/110)
 - ręczne uruchomienie aplikacji -> działa, widoczne UI
 - zweryfikowane: ścieżki EC/Super I/O, konfiguracja bezpieczeństwa, stan repo

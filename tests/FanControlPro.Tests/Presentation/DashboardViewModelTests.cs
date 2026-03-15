@@ -58,6 +58,52 @@ public sealed class DashboardViewModelTests
     }
 
     [Fact]
+    public async Task SaveSettingsCommand_WhenValidationFails_ShouldExposeErrors()
+    {
+        var context = CreateContext();
+        context.SettingsService.NextSaveResult = ApplicationSettingsValidationResult.Failed(
+            "Polling interval out of range",
+            "CPU threshold invalid");
+
+        var sut = CreateSut(context);
+        await WaitForInitializationAsync(sut);
+
+        sut.SelectedTheme = ApplicationTheme.System.ToString();
+        await sut.SaveSettingsCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, context.SettingsService.SaveCallCount);
+        Assert.Contains("Polling interval out of range", sut.SettingsStatusMessage, StringComparison.Ordinal);
+        Assert.Contains("CPU threshold invalid", sut.SettingsStatusMessage, StringComparison.Ordinal);
+        Assert.Equal("✗ Ustawienia nie zostały zapisane.", sut.StatusMessage);
+    }
+
+    [Fact]
+    public async Task ResetSettingsCommand_ShouldRestoreDefaults()
+    {
+        var context = CreateContext();
+        context.SettingsService.SetCurrentForTest(
+            ApplicationSettings.Default with
+            {
+                Theme = ApplicationTheme.Dark,
+                EnableAutostart = true,
+                StartupDelaySeconds = 120,
+                DefaultProfileName = "Performance"
+            });
+
+        var sut = CreateSut(context);
+        await WaitForInitializationAsync(sut);
+
+        await sut.ResetSettingsCommand.ExecuteAsync(null);
+
+        Assert.Equal(ApplicationTheme.System.ToString(), sut.SelectedTheme);
+        Assert.False(sut.SettingsEnableAutostart);
+        Assert.Equal(30, sut.SettingsStartupDelaySeconds);
+        Assert.Equal("Balanced", sut.SettingsDefaultProfile);
+        Assert.Equal("✓ Przywrócono ustawienia domyślne.", sut.SettingsStatusMessage);
+        Assert.Equal("✓ Ustawienia domyślne aktywne.", sut.StatusMessage);
+    }
+
+    [Fact]
     public async Task ExportSupportBundleCommand_OnSuccess_ShouldSetPathAndStatus()
     {
         var context = CreateContext();
@@ -505,6 +551,11 @@ public sealed class DashboardViewModelTests
             Current = ApplicationSettings.Default;
             SettingsChanged?.Invoke(this, Current);
             return Task.FromResult(Current);
+        }
+
+        public void SetCurrentForTest(ApplicationSettings settings)
+        {
+            Current = settings;
         }
     }
 }

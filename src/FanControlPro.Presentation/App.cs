@@ -84,7 +84,11 @@ namespace FanControlPro.Presentation
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var startupLite = HasArgument(desktop.Args, "--startup-lite", "--skip-startup-services", "--diag-startup");
+                var startupLite = AppRuntimePolicy.HasArgument(
+                    desktop.Args,
+                    "--startup-lite",
+                    "--skip-startup-services",
+                    "--diag-startup");
 
                 if (!startupLite)
                 {
@@ -126,7 +130,7 @@ namespace FanControlPro.Presentation
 
                 var mainWindow = Host.Services.GetRequiredService<MainWindow>();
                 var viewModel = Host.Services.GetRequiredService<DashboardViewModel>();
-                var disableTray = HasArgument(desktop.Args, "--no-tray", "--disable-tray");
+                var disableTray = AppRuntimePolicy.HasArgument(desktop.Args, "--no-tray", "--disable-tray");
                 ITrayService trayService = disableTray
                     ? new NullTrayService()
                     : Host.Services.GetRequiredService<ITrayService>();
@@ -257,7 +261,7 @@ namespace FanControlPro.Presentation
                 MaybeNotifyFailsafe(notificationManager, viewModel.SafetyState, viewModel.SafetyStatusMessage);
                 MaybeNotifyTemperatureAlerts(notificationManager, viewModel.SafetyAlertsSummary);
 
-                var startMinimized = ShouldStartMinimized(desktop.Args);
+                var startMinimized = AppRuntimePolicy.ShouldStartMinimized(desktop.Args);
                 if (startMinimized)
                 {
                     HideMainWindow(mainWindow, trayService, viewModel);
@@ -289,46 +293,6 @@ namespace FanControlPro.Presentation
             }
 
             base.OnFrameworkInitializationCompleted();
-        }
-
-        private static bool ShouldStartMinimized(IReadOnlyList<string>? args)
-        {
-            if (args is null || args.Count == 0)
-            {
-                return false;
-            }
-
-            if (args.Any(arg =>
-                    string.Equals(arg, "--force-visible", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(arg, "--show-main-window", StringComparison.OrdinalIgnoreCase)))
-            {
-                return false;
-            }
-
-            return args.Any(arg =>
-                string.Equals(arg, "--start-minimized", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(arg, "--start-to-tray", StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static bool HasArgument(IReadOnlyList<string>? args, params string[] acceptedValues)
-        {
-            if (args is null || args.Count == 0 || acceptedValues.Length == 0)
-            {
-                return false;
-            }
-
-            foreach (var arg in args)
-            {
-                foreach (var acceptedValue in acceptedValues)
-                {
-                    if (string.Equals(arg, acceptedValue, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
         private static async Task EnsureMainWindowVisibleAsync(
@@ -508,12 +472,7 @@ namespace FanControlPro.Presentation
 
         private void ApplyTheme(ApplicationTheme theme)
         {
-            RequestedThemeVariant = theme switch
-            {
-                ApplicationTheme.Light => ThemeVariant.Light,
-                ApplicationTheme.Dark => ThemeVariant.Dark,
-                _ => ThemeVariant.Light
-            };
+            RequestedThemeVariant = AppRuntimePolicy.ResolveThemeVariant(theme);
         }
     }
 }

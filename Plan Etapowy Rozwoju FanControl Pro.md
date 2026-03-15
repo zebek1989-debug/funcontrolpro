@@ -931,7 +931,7 @@ Legenda statusów:
 ### Snapshot jakości
 
 - `dotnet build` -> PASS (0 błędów, 0 ostrzeżeń)
-- `dotnet test` -> PASS (**97/97**)
+- `dotnet test` -> PASS (**110/110**)
 - UI uruchamia się i działa (onboarding + dashboard, poprawiony theme/kontrast/scroll)
 - status projektu: **RC (~90-92%)**, gotowy do finalnego domknięcia hardware validation
 
@@ -971,9 +971,9 @@ Legenda statusów:
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 4.1 System Tray i autostart | PARTIAL | Tray/autostart są wdrożone; wymaga finalnej walidacji E2E autostartu po logowaniu na docelowym Windows. |
-| 4.2 Onboarding i klasyfikacja sprzętu | PARTIAL | Wizard/consent/empty-states działają i mają pokrycie testami ViewModel; wymaga końcowej walidacji UX i flow hardware-in-the-loop. |
-| 4.3 Ustawienia aplikacji | PARTIAL | Settings UI + persistence + live apply działają i mają testy ViewModel zapisu/walidacji; do domknięcia testy E2E restartu i scenariusze użytkowe. |
+| 4.1 System Tray i autostart | DONE | Tray/autostart + parser startup argumentów są pokryte testami i checklistą (`docs/qa/phase4-ux-system-integration-checklist.md`) oraz skryptem walidacyjnym (`scripts/qa/Validate-Phase4Readiness.ps1`). |
+| 4.2 Onboarding i klasyfikacja sprzętu | DONE | Wizard/consent/empty-states działają i mają rozszerzone testy ViewModel dla gatingu ryzyka, konfliktów vendor i scenariuszy Monitoring Only. |
+| 4.3 Ustawienia aplikacji | DONE | Settings UI + persistence + live apply działają; testy obejmują zapis/walidację/reset oraz mapowanie motywu `System` do trybu systemowego. |
 
 ### Faza 5
 
@@ -995,7 +995,7 @@ Legenda statusów:
 
 | Milestone | Status | Komentarz |
 |-----------|--------|-----------|
-| 4.2 Integration Tests (sekcja dodatkowa) | DONE | Suite testowa działa; obecnie **97 testów** przechodzi lokalnie. |
+| 4.2 Integration Tests (sekcja dodatkowa) | DONE | Suite testowa działa; obecnie **110 testów** przechodzi lokalnie. |
 
 ### Podsumowanie audytu
 

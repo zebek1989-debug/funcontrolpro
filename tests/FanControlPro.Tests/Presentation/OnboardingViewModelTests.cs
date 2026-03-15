@@ -113,6 +113,58 @@ public sealed class OnboardingViewModelTests
         Assert.True(sut.CanProceed);
     }
 
+    [Fact]
+    public void CanProceed_OnRiskStepWithoutControlConsentRequirement_ShouldAllowProceed()
+    {
+        var onboardingService = new FakeOnboardingService(
+            new OnboardingState(OnboardingStep.RiskAcceptance, IsCompleted: false, CompletedAtUtc: null));
+        var controlService = new FakeControlOnboardingService(
+            new ControlOnboardingState(HasAcceptedRisk: false, AcceptedAtUtc: null, AcceptedBy: null));
+
+        var sut = CreateSut(onboardingService, controlService);
+        sut.CurrentStep = OnboardingStep.RiskAcceptance;
+        sut.HasFullControlComponents = false;
+        sut.IsRunningAsAdministrator = true;
+        sut.HasVendorSoftwareConflict = false;
+        sut.HasAcceptedRisk = false;
+
+        Assert.True(sut.CanProceed);
+    }
+
+    [Fact]
+    public void RiskAcceptanceMessage_WhenAdministratorIsMissing_ShouldExplainBlockingReason()
+    {
+        var onboardingService = new FakeOnboardingService(
+            new OnboardingState(OnboardingStep.RiskAcceptance, IsCompleted: false, CompletedAtUtc: null));
+        var controlService = new FakeControlOnboardingService(
+            new ControlOnboardingState(HasAcceptedRisk: false, AcceptedAtUtc: null, AcceptedBy: null));
+
+        var sut = CreateSut(onboardingService, controlService);
+        sut.HasFullControlComponents = true;
+        sut.IsRunningAsAdministrator = false;
+        sut.HasVendorSoftwareConflict = false;
+
+        Assert.Contains("Brak uprawnien administratora", sut.RiskAcceptanceMessage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RiskAcceptanceMessage_WhenVendorConflictDetected_ShouldContainConflictHint()
+    {
+        var onboardingService = new FakeOnboardingService(
+            new OnboardingState(OnboardingStep.RiskAcceptance, IsCompleted: false, CompletedAtUtc: null));
+        var controlService = new FakeControlOnboardingService(
+            new ControlOnboardingState(HasAcceptedRisk: false, AcceptedAtUtc: null, AcceptedBy: null));
+
+        var sut = CreateSut(onboardingService, controlService);
+        sut.HasFullControlComponents = true;
+        sut.IsRunningAsAdministrator = true;
+        sut.VendorConflictDetails = "ArmouryCrate";
+        sut.HasVendorSoftwareConflict = true;
+
+        Assert.Contains("Wykryto potencjalny konflikt", sut.RiskAcceptanceMessage, StringComparison.Ordinal);
+        Assert.Contains("ArmouryCrate", sut.RiskAcceptanceMessage, StringComparison.Ordinal);
+    }
+
     private static OnboardingViewModel CreateSut(
         IOnboardingService onboardingService,
         IControlOnboardingService controlOnboardingService)

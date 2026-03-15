@@ -73,6 +73,50 @@ public class TaskSchedulerAutostartServiceTests
         Assert.Empty(commands);
     }
 
+    [Fact]
+    public async Task ConfigureAsync_DisableDoesNothingWhenTaskDoesNotExist()
+    {
+        var commands = new List<(string FileName, string Arguments)>();
+        var service = CreateService(
+            options: new AutostartOptions { TaskName = "FanControlPro.Test" },
+            commands: commands,
+            queuedExitCodes: new Queue<int>(new[] { 1 }),
+            isWindows: () => true);
+
+        await service.ConfigureAsync(
+            enabled: false,
+            startMinimizedToTray: true,
+            startupDelay: TimeSpan.Zero);
+
+        var command = Assert.Single(commands);
+        Assert.Contains("/Query /TN \"FanControlPro.Test\"", command.Arguments, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ConfigureAsync_EnableWithoutDelayAndWithoutMinimized_ShouldNotIncludeOptionalFlags()
+    {
+        var commands = new List<(string FileName, string Arguments)>();
+        var service = CreateService(
+            options: new AutostartOptions
+            {
+                TaskName = "FanControlPro.Test",
+                ExecutablePath = @"C:\Apps\FanControlPro\FanControlPro.exe"
+            },
+            commands: commands,
+            queuedExitCodes: new Queue<int>(new[] { 0 }),
+            isWindows: () => true);
+
+        await service.ConfigureAsync(
+            enabled: true,
+            startMinimizedToTray: false,
+            startupDelay: TimeSpan.Zero);
+
+        var command = Assert.Single(commands);
+        Assert.Contains("/Create", command.Arguments, StringComparison.Ordinal);
+        Assert.DoesNotContain("--start-minimized", command.Arguments, StringComparison.Ordinal);
+        Assert.DoesNotContain("/DELAY", command.Arguments, StringComparison.Ordinal);
+    }
+
     private static TaskSchedulerAutostartService CreateService(
         AutostartOptions options,
         List<(string FileName, string Arguments)> commands,
