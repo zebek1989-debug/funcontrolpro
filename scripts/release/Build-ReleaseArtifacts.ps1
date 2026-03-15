@@ -27,7 +27,8 @@ $wixProjectPath = "installer/wix/FanControlPro.Installer.wixproj"
 $wixManifestScript = "scripts/release/Generate-WixFileManifest.ps1"
 
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$runRoot = Join-Path $OutputRoot "$Version-$timestamp"
+$outputRootFullPath = [System.IO.Path]::GetFullPath($OutputRoot)
+$runRoot = Join-Path $outputRootFullPath "$Version-$timestamp"
 $publishDir = Join-Path $runRoot "publish/$Runtime"
 $portableZipPath = Join-Path $runRoot "FanControlPro-$Version-$Runtime-portable.zip"
 $checksumsPath = Join-Path $runRoot "SHA256SUMS.txt"
