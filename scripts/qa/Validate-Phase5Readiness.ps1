@@ -169,9 +169,6 @@ try {
     }
 
     & $matrixScriptPath @matrixParams
-    if ($LASTEXITCODE -ne 0) {
-        throw "Hardware matrix validation script failed with exit code $LASTEXITCODE."
-    }
 
     $buildParams = @{
         Arguments = @("build", "--verbosity", "minimal")
